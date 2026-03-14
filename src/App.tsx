@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ThemeProvider } from "@/components/theme-provider";
 import DashboardPage from "@/pages/DashboardPage";
+import LeadCapturePage from "@/pages/LeadCapturePage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Routes>
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<DashboardPage />} />
+              <Route path="/lead-capture" element={<LeadCapturePage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
