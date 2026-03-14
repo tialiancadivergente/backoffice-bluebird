@@ -10,6 +10,8 @@ const leadCaptureClient = axios.create({
 });
 
 export async function fetchLeadCaptures(params: LeadCaptureParams): Promise<LeadCaptureResponse> {
-  const { data } = await leadCaptureClient.get<LeadCaptureResponse>("/capture", { params });
+  const { data } = await leadCaptureClient.get<LeadCaptureResponse>("/capture", {
+    params: { ...params, sort: "created_at", order: "desc" },
+  });
   return data;
 }

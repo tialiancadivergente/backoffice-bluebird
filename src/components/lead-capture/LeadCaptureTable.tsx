@@ -11,14 +11,18 @@ interface Props {
 }
 
 const columns = [
+  { key: "created_at", label: "Data" },
   { key: "person_email", label: "Email" },
   { key: "person_phone", label: "Telefone" },
+  { key: "launch_name", label: "Launch" },
+  { key: "season_name", label: "Season" },
   { key: "platform_name", label: "Plataforma" },
   { key: "strategy_name", label: "Estratégia" },
   { key: "temperature_name", label: "Temperatura" },
+  { key: "page", label: "Page" },
+  { key: "path", label: "Path" },
   { key: "utm_source", label: "UTM Source" },
   { key: "utm_medium", label: "UTM Medium" },
-  { key: "created_at", label: "Data" },
 ] as const;
 
 function formatDate(dateStr: string) {
@@ -67,14 +71,18 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
           ) : (
             items.map((item) => (
               <TableRow key={item.id}>
+                <TableCell className="whitespace-nowrap">{formatDate(item.created_at)}</TableCell>
                 <TableCell className="font-medium">{item.person_email || "—"}</TableCell>
                 <TableCell>{item.person_phone || "—"}</TableCell>
+                <TableCell>{item.launch_name || "—"}</TableCell>
+                <TableCell>{item.season_name || "—"}</TableCell>
                 <TableCell>{item.platform_name || "—"}</TableCell>
                 <TableCell>{item.strategy_name || "—"}</TableCell>
                 <TableCell>{item.temperature_name || "—"}</TableCell>
+                <TableCell>{item.page || "—"}</TableCell>
+                <TableCell>{item.path || "—"}</TableCell>
                 <TableCell>{item.utm_source || "—"}</TableCell>
                 <TableCell>{item.utm_medium || "—"}</TableCell>
-                <TableCell>{formatDate(item.created_at)}</TableCell>
               </TableRow>
             ))
           )}
