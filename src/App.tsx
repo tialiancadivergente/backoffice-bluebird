@@ -21,6 +21,7 @@ const App = () => (
           <Routes>
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<DashboardPage />} />
+              <Route path="/lead-capture" element={<LeadCapturePage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
