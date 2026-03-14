@@ -11,14 +11,18 @@ interface Props {
 }
 
 const columns = [
+  { key: "created_at", label: "Data" },
   { key: "person_email", label: "Email" },
   { key: "person_phone", label: "Telefone" },
+  { key: "launch_name", label: "Launch" },
+  { key: "season_name", label: "Season" },
   { key: "platform_name", label: "Plataforma" },
   { key: "strategy_name", label: "Estratégia" },
   { key: "temperature_name", label: "Temperatura" },
+  { key: "page", label: "Page" },
+  { key: "path", label: "Path" },
   { key: "utm_source", label: "UTM Source" },
   { key: "utm_medium", label: "UTM Medium" },
-  { key: "created_at", label: "Data" },
 ] as const;
 
 function formatDate(dateStr: string) {
