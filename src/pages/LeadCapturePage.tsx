@@ -6,7 +6,7 @@ import type { LeadCaptureParams } from "@/types/lead-capture";
 
 const DEFAULT_PARAMS: Omit<LeadCaptureParams, "page" | "per_page"> = {
   start_date: "2026-03-10",
-  end_date: "2026-03-12",
+  end_date: new Date().toISOString().split("T")[0],
   launch_id: "4c88a392-6e6f-417e-822a-5be7221900fd",
   temperature_id: "e80e6a86-6ad9-43ec-b30f-5bd45af522b4",
   season_id: "43494acc-cda4-4aaa-acad-c12929bd2eb0",
