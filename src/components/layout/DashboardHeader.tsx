@@ -1,4 +1,5 @@
 import { Bell, Search } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function DashboardHeader() {
   return (
@@ -11,6 +12,7 @@ export function DashboardHeader() {
         </div>
       </div>
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />

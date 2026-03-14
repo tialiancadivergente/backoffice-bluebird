@@ -6,6 +6,57 @@
 
 @layer base {
   :root {
+    --background: 0 0% 98%;
+    --foreground: 200 40% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 200 40% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 40% 8%;
+
+    --primary: 193 84% 7%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 193 20% 94%;
+    --secondary-foreground: 200 40% 8%;
+
+    --muted: 193 20% 94%;
+    --muted-foreground: 193 20% 45%;
+
+    --accent: 173 80% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 193 20% 88%;
+    --input: 193 20% 90%;
+    --ring: 173 80% 35%;
+
+    --radius: 0.6rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 200 40% 8%;
+    --sidebar-primary: 173 80% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 193 20% 94%;
+    --sidebar-accent-foreground: 200 40% 8%;
+    --sidebar-border: 193 20% 88%;
+    --sidebar-ring: 173 80% 35%;
+
+    --brand-950: 193 76% 3%;
+    --brand-900: 193 84% 7%;
+    --brand-800: 193 76% 12%;
+    --brand-700: 193 70% 18%;
+    --brand-400: 173 80% 40%;
+    --brand-50: 180 60% 98%;
+
+    --shadow-card: 0 1px 3px 0 hsl(193 76% 3% / 0.1), 0 1px 2px -1px hsl(193 76% 3% / 0.1);
+    --shadow-elevated: 0 4px 6px -1px hsl(193 76% 3% / 0.1), 0 2px 4px -2px hsl(193 76% 3% / 0.1);
+  }
+
+  .dark {
     --background: 193 76% 3%;
     --foreground: 180 20% 98%;
 
@@ -34,8 +85,6 @@
     --input: 193 50% 15%;
     --ring: 173 80% 40%;
 
-    --radius: 0.6rem;
-
     --sidebar-background: 193 84% 7%;
     --sidebar-foreground: 180 20% 98%;
     --sidebar-primary: 173 80% 40%;
@@ -44,13 +93,6 @@
     --sidebar-accent-foreground: 180 20% 98%;
     --sidebar-border: 193 50% 12%;
     --sidebar-ring: 173 80% 40%;
-
-    --brand-950: 193 76% 3%;
-    --brand-900: 193 84% 7%;
-    --brand-800: 193 76% 12%;
-    --brand-700: 193 70% 18%;
-    --brand-400: 173 80% 40%;
-    --brand-50: 180 60% 98%;
 
     --shadow-card: 0 1px 3px 0 hsl(193 76% 3% / 0.4), 0 1px 2px -1px hsl(193 76% 3% / 0.4);
     --shadow-elevated: 0 4px 6px -1px hsl(193 76% 3% / 0.5), 0 2px 4px -2px hsl(193 76% 3% / 0.5);
