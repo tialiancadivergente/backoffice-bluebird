@@ -24,6 +24,10 @@ const columns = [
   { key: "path", label: "Path" },
   { key: "utm_source", label: "UTM Source" },
   { key: "utm_medium", label: "UTM Medium" },
+  { key: "utm_campaign", label: "UTM Campaign" },
+  { key: "utm_content", label: "UTM Content" },
+  { key: "utm_term", label: "UTM Term" },
+  { key: "utm_id", label: "UTM ID" },
 ] as const;
 
 function formatDate(dateStr: string) {
