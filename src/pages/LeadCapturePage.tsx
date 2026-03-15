@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { Download, FileSpreadsheet } from "lucide-react";
 import { useLeadCaptures } from "@/hooks/use-lead-captures";
 import { LeadCaptureTable } from "@/components/lead-capture/LeadCaptureTable";
 import { LeadCapturePagination } from "@/components/lead-capture/LeadCapturePagination";
 import { LeadCaptureFilters } from "@/components/lead-capture/LeadCaptureFilters";
+import { Button } from "@/components/ui/button";
+import { downloadCSV, downloadExcel } from "@/lib/export-leads";
 import type { LeadCaptureParams } from "@/types/lead-capture";
 
 const FIXED_PARAMS = {
