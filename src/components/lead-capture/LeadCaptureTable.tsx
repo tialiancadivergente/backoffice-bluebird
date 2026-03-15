@@ -32,6 +32,21 @@ function formatDate(dateStr: string) {
     day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
 }
+function TruncatedCell({ value }: { value: string }) {
+  const text = value || "—";
+  return (
+    <TableCell className="max-w-[200px]">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="block truncate">{text}</span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[400px] break-all">
+          {text}
+        </TooltipContent>
+      </Tooltip>
+    </TableCell>
+  );
+}
 
 export function LeadCaptureTable({ items, isLoading, isError }: Props) {
   if (isError) {
