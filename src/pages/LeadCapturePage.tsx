@@ -22,17 +22,13 @@ export default function LeadCapturePage() {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
-  const canFetch = !!startDate && !!endDate;
-
-  const params: LeadCaptureParams | null = canFetch
-    ? {
-        page,
-        per_page: perPage,
-        start_date: toDateStr(startDate),
-        end_date: toDateStr(endDate),
-        ...FIXED_PARAMS,
-      }
-    : null;
+  const params: LeadCaptureParams = {
+    page,
+    per_page: perPage,
+    ...FIXED_PARAMS,
+    ...(startDate ? { start_date: toDateStr(startDate) } : {}),
+    ...(endDate ? { end_date: toDateStr(endDate) } : {}),
+  } as LeadCaptureParams;
 
   const { data, isLoading, isError } = useLeadCaptures(params);
 
@@ -60,15 +56,9 @@ export default function LeadCapturePage() {
         onEndDateChange={handleEndDateChange}
       />
 
-      {!canFetch ? (
-        <p className="text-sm text-muted-foreground">Selecione o período para visualizar os leads.</p>
-      ) : (
-        <>
-          <LeadCaptureTable items={data?.items ?? []} isLoading={isLoading} isError={isError} />
-          {data?.meta && (
-            <LeadCapturePagination meta={data.meta} onPageChange={setPage} />
-          )}
-        </>
+      <LeadCaptureTable items={data?.items ?? []} isLoading={isLoading} isError={isError} />
+      {data?.meta && (
+        <LeadCapturePagination meta={data.meta} onPageChange={setPage} />
       )}
     </div>
   );

@@ -45,8 +45,8 @@ export interface LeadCaptureResponse {
 export interface LeadCaptureParams {
   page: number;
   per_page: number;
-  start_date: string;
-  end_date: string;
+  start_date?: string;
+  end_date?: string;
   launch_id: string;
   temperature_id: string;
   season_id: string;
