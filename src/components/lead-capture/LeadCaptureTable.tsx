@@ -2,6 +2,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { LeadCapture } from "@/types/lead-capture";
 
 interface Props {
@@ -30,6 +31,21 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("pt-BR", {
     day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
+}
+function TruncatedCell({ value }: { value: string }) {
+  const text = value || "—";
+  return (
+    <TableCell className="max-w-[200px]">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="block truncate">{text}</span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[400px] break-all">
+          {text}
+        </TooltipContent>
+      </Tooltip>
+    </TableCell>
+  );
 }
 
 export function LeadCaptureTable({ items, isLoading, isError }: Props) {
@@ -79,10 +95,10 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
                 <TableCell>{item.platform_name || "—"}</TableCell>
                 <TableCell>{item.strategy_name || "—"}</TableCell>
                 <TableCell>{item.temperature_name || "—"}</TableCell>
-                <TableCell>{item.page || "—"}</TableCell>
-                <TableCell>{item.path || "—"}</TableCell>
-                <TableCell>{item.utm_source || "—"}</TableCell>
-                <TableCell>{item.utm_medium || "—"}</TableCell>
+                <TruncatedCell value={item.page} />
+                <TruncatedCell value={item.path} />
+                <TruncatedCell value={item.utm_source} />
+                <TruncatedCell value={item.utm_medium} />
               </TableRow>
             ))
           )}
