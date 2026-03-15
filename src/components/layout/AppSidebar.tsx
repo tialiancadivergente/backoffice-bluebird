@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, LayoutDashboard, Users, Settings, Package, ShoppingCart, BarChart3, Target } from "lucide-react";
+import { ChevronLeft, LayoutDashboard, Target } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -13,11 +13,6 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Target, label: "Lead Capture", href: "/lead-capture" },
-  { icon: Package, label: "Produtos", href: "/produtos" },
-  { icon: ShoppingCart, label: "Pedidos", href: "/pedidos" },
-  { icon: Users, label: "Clientes", href: "/clientes" },
-  { icon: BarChart3, label: "Relatórios", href: "/relatorios" },
-  { icon: Settings, label: "Configurações", href: "/configuracoes" },
 ];
 
 const sidebarVariants = {
