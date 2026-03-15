@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { Download, FileSpreadsheet } from "lucide-react";
 import { useLeadCaptures } from "@/hooks/use-lead-captures";
 import { LeadCaptureTable } from "@/components/lead-capture/LeadCaptureTable";
 import { LeadCapturePagination } from "@/components/lead-capture/LeadCapturePagination";
 import { LeadCaptureFilters } from "@/components/lead-capture/LeadCaptureFilters";
+import { Button } from "@/components/ui/button";
+import { downloadCSV, downloadExcel } from "@/lib/export-leads";
 import type { LeadCaptureParams } from "@/types/lead-capture";
 
 const FIXED_PARAMS = {
@@ -31,6 +34,7 @@ export default function LeadCapturePage() {
   } as LeadCaptureParams;
 
   const { data, isLoading, isError } = useLeadCaptures(params);
+  const items = data?.items ?? [];
 
   const handleStartDateChange = (date: Date | undefined) => {
     setStartDate(date);
@@ -49,14 +53,36 @@ export default function LeadCapturePage() {
         <p className="text-muted-foreground text-sm mt-1">Gerencie e visualize os leads capturados.</p>
       </div>
 
-      <LeadCaptureFilters
-        startDate={startDate}
-        endDate={endDate}
-        onStartDateChange={handleStartDateChange}
-        onEndDateChange={handleEndDateChange}
-      />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <LeadCaptureFilters
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+        />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!items.length}
+            onClick={() => downloadCSV(items)}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!items.length}
+            onClick={() => downloadExcel(items)}
+          >
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Excel
+          </Button>
+        </div>
+      </div>
 
-      <LeadCaptureTable items={data?.items ?? []} isLoading={isLoading} isError={isError} />
+      <LeadCaptureTable items={items} isLoading={isLoading} isError={isError} />
       {data?.meta && (
         <LeadCapturePagination meta={data.meta} onPageChange={setPage} />
       )}
