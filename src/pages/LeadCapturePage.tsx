@@ -52,12 +52,34 @@ export default function LeadCapturePage() {
         <p className="text-muted-foreground text-sm mt-1">Gerencie e visualize os leads capturados.</p>
       </div>
 
-      <LeadCaptureFilters
-        startDate={startDate}
-        endDate={endDate}
-        onStartDateChange={handleStartDateChange}
-        onEndDateChange={handleEndDateChange}
-      />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <LeadCaptureFilters
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+        />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!items.length}
+            onClick={() => downloadCSV(items)}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!items.length}
+            onClick={() => downloadExcel(items)}
+          >
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Excel
+          </Button>
+        </div>
+      </div>
 
       <LeadCaptureTable items={data?.items ?? []} isLoading={isLoading} isError={isError} />
       {data?.meta && (
