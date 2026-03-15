@@ -82,7 +82,7 @@ export default function LeadCapturePage() {
         </div>
       </div>
 
-      <LeadCaptureTable items={data?.items ?? []} isLoading={isLoading} isError={isError} />
+      <LeadCaptureTable items={items} isLoading={isLoading} isError={isError} />
       {data?.meta && (
         <LeadCapturePagination meta={data.meta} onPageChange={setPage} />
       )}
