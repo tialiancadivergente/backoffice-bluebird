@@ -34,6 +34,7 @@ export default function LeadCapturePage() {
   } as LeadCaptureParams;
 
   const { data, isLoading, isError } = useLeadCaptures(params);
+  const items = data?.items ?? [];
 
   const handleStartDateChange = (date: Date | undefined) => {
     setStartDate(date);
