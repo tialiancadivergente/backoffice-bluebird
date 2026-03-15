@@ -103,6 +103,10 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
                 <TruncatedCell value={item.path} />
                 <TruncatedCell value={item.utm_source} />
                 <TruncatedCell value={item.utm_medium} />
+                <TruncatedCell value={item.utm_campaign} />
+                <TruncatedCell value={item.utm_content} />
+                <TruncatedCell value={item.utm_term} />
+                <TruncatedCell value={item.utm_id} />
               </TableRow>
             ))
           )}
