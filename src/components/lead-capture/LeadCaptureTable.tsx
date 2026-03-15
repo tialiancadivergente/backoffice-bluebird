@@ -80,10 +80,10 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
                 <TableCell>{item.platform_name || "—"}</TableCell>
                 <TableCell>{item.strategy_name || "—"}</TableCell>
                 <TableCell>{item.temperature_name || "—"}</TableCell>
-                <TableCell>{item.page || "—"}</TableCell>
-                <TableCell>{item.path || "—"}</TableCell>
-                <TableCell>{item.utm_source || "—"}</TableCell>
-                <TableCell>{item.utm_medium || "—"}</TableCell>
+                <TruncatedCell value={item.page} />
+                <TruncatedCell value={item.path} />
+                <TruncatedCell value={item.utm_source} />
+                <TruncatedCell value={item.utm_medium} />
               </TableRow>
             ))
           )}
