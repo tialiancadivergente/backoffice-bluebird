@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, LayoutDashboard, Target } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import logoAlianca from "@/assets/logo-alianca.svg";
 
 interface MenuItem {
   icon: React.ElementType;
