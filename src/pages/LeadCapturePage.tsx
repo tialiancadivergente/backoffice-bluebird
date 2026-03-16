@@ -10,11 +10,6 @@ import { exportLeadsCsv, exportLeadsExcel } from "@/api/lead-capture";
 import { toast } from "sonner";
 import type { LeadCaptureParams, LeadExportParams } from "@/types/lead-capture";
 
-const FIXED_PARAMS = {
-  launch_id: "4c88a392-6e6f-417e-822a-5be7221900fd",
-  temperature_id: "e80e6a86-6ad9-43ec-b30f-5bd45af522b4",
-  season_id: "43494acc-cda4-4aaa-acad-c12929bd2eb0",
-};
 
 function toDateStr(d: Date) {
   return format(d, "yyyy-MM-dd");
