@@ -32,7 +32,7 @@ export function AppSidebar() {
       className="h-screen bg-sidebar border-r border-sidebar-border flex flex-col relative shrink-0"
     >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
         <AnimatePresence mode="wait">
           {!isCollapsed && (
             <motion.span
