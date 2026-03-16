@@ -117,8 +117,8 @@ export function AppSidebar() {
                 transition={{ duration: 0.15 }}
                 className="overflow-hidden"
               >
-                <p className="text-sm font-medium text-foreground truncate">Admin</p>
-                <p className="text-xs text-muted-foreground truncate">admin@core.app</p>
+                <p className="text-sm font-medium text-sidebar-foreground truncate">Admin</p>
+                <p className="text-xs text-sidebar-foreground/50 truncate">admin@core.app</p>
               </motion.div>
             )}
           </AnimatePresence>
