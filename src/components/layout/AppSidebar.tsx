@@ -29,10 +29,10 @@ export function AppSidebar() {
       animate={isCollapsed ? "collapsed" : "expanded"}
       variants={sidebarVariants}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="h-screen bg-primary border-r border-border flex flex-col relative shrink-0"
+      className="h-screen bg-sidebar border-r border-sidebar-border flex flex-col relative shrink-0"
     >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
         <AnimatePresence mode="wait">
           {!isCollapsed && (
             <motion.span
@@ -40,7 +40,7 @@ export function AppSidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="font-bold text-xl tracking-tight text-accent"
+              className="font-bold text-xl tracking-tight text-sidebar-primary"
             >
               CORE.
             </motion.span>
@@ -48,7 +48,7 @@ export function AppSidebar() {
         </AnimatePresence>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          className="p-1.5 rounded-md hover:bg-sidebar-accent/20 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground"
         >
           <ChevronLeft
             className={cn(
@@ -70,8 +70,8 @@ export function AppSidebar() {
               cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
                 isActive
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "bg-sidebar-accent/15 text-sidebar-foreground"
+                  : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/10"
               )
             }
           >
@@ -80,7 +80,7 @@ export function AppSidebar() {
                 <item.icon
                   className={cn(
                     "w-5 h-5 shrink-0 transition-colors",
-                    isActive ? "text-accent" : "group-hover:text-accent"
+                    isActive ? "text-sidebar-accent" : "group-hover:text-sidebar-accent"
                   )}
                 />
                 <AnimatePresence mode="wait">
@@ -103,10 +103,10 @@ export function AppSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-border">
+      <div className="px-3 py-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-            <span className="text-xs font-semibold text-accent">A</span>
+          <div className="w-8 h-8 rounded-full bg-sidebar-accent/20 flex items-center justify-center shrink-0">
+            <span className="text-xs font-semibold text-sidebar-accent">A</span>
           </div>
           <AnimatePresence mode="wait">
             {!isCollapsed && (
@@ -117,8 +117,8 @@ export function AppSidebar() {
                 transition={{ duration: 0.15 }}
                 className="overflow-hidden"
               >
-                <p className="text-sm font-medium text-foreground truncate">Admin</p>
-                <p className="text-xs text-muted-foreground truncate">admin@core.app</p>
+                <p className="text-sm font-medium text-sidebar-foreground truncate">Admin</p>
+                <p className="text-xs text-sidebar-foreground/50 truncate">admin@core.app</p>
               </motion.div>
             )}
           </AnimatePresence>
