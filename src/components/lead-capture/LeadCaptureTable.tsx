@@ -126,8 +126,7 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
                 <TableCell>{item.platform_name || "—"}</TableCell>
                 <TableCell>{item.strategy_name || "—"}</TableCell>
                 <TableCell>{item.temperature_name || "—"}</TableCell>
-                <TruncatedCell value={item.page} />
-                <TruncatedCell value={item.path} />
+                <UrlCell page={item.page} path={item.path} />
                 <TruncatedCell value={item.utm_source} />
                 <TruncatedCell value={item.utm_medium} />
                 <TruncatedCell value={item.utm_campaign} />
