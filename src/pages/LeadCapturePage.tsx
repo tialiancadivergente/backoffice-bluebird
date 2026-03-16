@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Download, FileSpreadsheet } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { useLeadCaptures } from "@/hooks/use-lead-captures";
 import { LeadCaptureTable } from "@/components/lead-capture/LeadCaptureTable";
 import { LeadCapturePagination } from "@/components/lead-capture/LeadCapturePagination";
 import { LeadCaptureFilters } from "@/components/lead-capture/LeadCaptureFilters";
 import { Button } from "@/components/ui/button";
-import { downloadCSV, downloadExcel } from "@/lib/export-leads";
-import type { LeadCaptureParams } from "@/types/lead-capture";
+import { exportLeadsCsv, exportLeadsExcel } from "@/api/lead-capture";
+import { toast } from "sonner";
+import type { LeadCaptureParams, LeadExportParams } from "@/types/lead-capture";
 
 const FIXED_PARAMS = {
   launch_id: "4c88a392-6e6f-417e-822a-5be7221900fd",
@@ -19,11 +20,21 @@ function toDateStr(d: Date) {
   return format(d, "yyyy-MM-dd");
 }
 
+function triggerBlobDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function LeadCapturePage() {
   const [page, setPage] = useState(1);
   const [perPage] = useState(10);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [exporting, setExporting] = useState<"csv" | "excel" | null>(null);
 
   const params: LeadCaptureParams = {
     page,
@@ -32,6 +43,12 @@ export default function LeadCapturePage() {
     ...(startDate ? { start_date: toDateStr(startDate) } : {}),
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
   } as LeadCaptureParams;
+
+  const exportParams: LeadExportParams = {
+    ...FIXED_PARAMS,
+    ...(startDate ? { start_date: toDateStr(startDate) } : {}),
+    ...(endDate ? { end_date: toDateStr(endDate) } : {}),
+  };
 
   const { data, isLoading, isError } = useLeadCaptures(params);
   const items = data?.items ?? [];
@@ -44,6 +61,32 @@ export default function LeadCapturePage() {
   const handleEndDateChange = (date: Date | undefined) => {
     setEndDate(date);
     setPage(1);
+  };
+
+  const handleExportCsv = async () => {
+    setExporting("csv");
+    try {
+      const blob = await exportLeadsCsv(exportParams);
+      triggerBlobDownload(blob, "leads.csv");
+      toast.success("CSV exportado com sucesso!");
+    } catch {
+      toast.error("Erro ao exportar CSV.");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setExporting("excel");
+    try {
+      const blob = await exportLeadsExcel(exportParams);
+      triggerBlobDownload(blob, "leads.xlsx");
+      toast.success("Excel exportado com sucesso!");
+    } catch {
+      toast.error("Erro ao exportar Excel.");
+    } finally {
+      setExporting(null);
+    }
   };
 
   return (
@@ -64,19 +107,19 @@ export default function LeadCapturePage() {
           <Button
             variant="outline"
             size="sm"
-            disabled={!items.length}
-            onClick={() => downloadCSV(items)}
+            disabled={exporting !== null}
+            onClick={handleExportCsv}
           >
-            <Download className="mr-2 h-4 w-4" />
+            {exporting === "csv" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             CSV
           </Button>
           <Button
             variant="outline"
             size="sm"
-            disabled={!items.length}
-            onClick={() => downloadExcel(items)}
+            disabled={exporting !== null}
+            onClick={handleExportExcel}
           >
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            {exporting === "excel" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-2 h-4 w-4" />}
             Excel
           </Button>
         </div>
