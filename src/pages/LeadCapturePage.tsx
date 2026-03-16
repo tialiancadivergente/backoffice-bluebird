@@ -26,7 +26,7 @@ function triggerBlobDownload(blob: Blob, filename: string) {
 
 export default function LeadCapturePage() {
   const [page, setPage] = useState(1);
-  const [perPage] = useState(10);
+  const [perPage, setPerPage] = useState(10);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [exporting, setExporting] = useState<"csv" | "excel" | null>(null);
@@ -34,13 +34,11 @@ export default function LeadCapturePage() {
   const params: LeadCaptureParams = {
     page,
     per_page: perPage,
-    ...FIXED_PARAMS,
     ...(startDate ? { start_date: toDateStr(startDate) } : {}),
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
-  } as LeadCaptureParams;
+  };
 
   const exportParams: LeadExportParams = {
-    ...FIXED_PARAMS,
     ...(startDate ? { start_date: toDateStr(startDate) } : {}),
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
   };
