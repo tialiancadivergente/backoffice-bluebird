@@ -68,10 +68,10 @@ export function AppSidebar() {
             end={item.href === "/"}
             className={({ isActive }) =>
               cn(
-71:                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
-72:                 isActive
-73:                   ? "bg-sidebar-accent/15 text-sidebar-foreground"
-74:                   : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/10"
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
+                isActive
+                  ? "bg-sidebar-accent/15 text-sidebar-foreground"
+                  : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/10"
               )
             }
           >
