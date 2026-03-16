@@ -2,11 +2,16 @@ import {
   Pagination, PaginationContent, PaginationItem, PaginationLink,
   PaginationNext, PaginationPrevious, PaginationEllipsis,
 } from "@/components/ui/pagination";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import type { PaginationMeta } from "@/types/lead-capture";
 
 interface Props {
   meta: PaginationMeta;
+  perPage: number;
   onPageChange: (page: number) => void;
+  onPerPageChange: (perPage: number) => void;
 }
 
 function getVisiblePages(current: number, total: number): (number | "ellipsis")[] {
