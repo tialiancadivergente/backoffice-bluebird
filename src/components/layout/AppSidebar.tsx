@@ -80,7 +80,7 @@ export function AppSidebar() {
                 <item.icon
                   className={cn(
                     "w-5 h-5 shrink-0 transition-colors",
-                    isActive ? "text-accent" : "group-hover:text-accent"
+                    isActive ? "text-sidebar-accent" : "group-hover:text-sidebar-accent"
                   )}
                 />
                 <AnimatePresence mode="wait">
