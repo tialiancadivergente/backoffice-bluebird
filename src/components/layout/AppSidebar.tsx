@@ -29,7 +29,8 @@ export function AppSidebar() {
       animate={isCollapsed ? "collapsed" : "expanded"}
       variants={sidebarVariants}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="h-screen bg-sidebar border-r border-sidebar-border flex flex-col relative shrink-0"
+      style={{ background: 'radial-gradient(50% 75.08% at 50% 100.2%, rgba(16, 68, 72, 0.5) 0%, rgba(16, 68, 72, 0.2) 34.73%, rgba(16, 68, 72, 0) 100%), hsl(0 0% 8%)' }}
+      className="h-screen border-r border-sidebar-border flex flex-col relative shrink-0"
     >
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
