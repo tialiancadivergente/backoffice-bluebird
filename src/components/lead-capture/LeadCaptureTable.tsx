@@ -20,8 +20,7 @@ const columns = [
   { key: "platform_name", label: "Plataforma" },
   { key: "strategy_name", label: "Estratégia" },
   { key: "temperature_name", label: "Temperatura" },
-  { key: "page", label: "Page" },
-  { key: "path", label: "Path" },
+  { key: "full_url", label: "URL" },
   { key: "utm_source", label: "UTM Source" },
   { key: "utm_medium", label: "UTM Medium" },
   { key: "utm_campaign", label: "UTM Campaign" },
@@ -46,6 +45,34 @@ function TruncatedCell({ value }: { value: string }) {
         </TooltipTrigger>
         <TooltipContent side="top" className="max-w-[400px] break-all">
           {text}
+        </TooltipContent>
+      </Tooltip>
+    </TableCell>
+  );
+}
+
+function UrlCell({ page, path }: { page: string; path: string }) {
+  const fullUrl = page && path ? `${page}${path}` : page || path || "—";
+  const isLink = page && path;
+  return (
+    <TableCell className="max-w-[280px]">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {isLink ? (
+            <a
+              href={fullUrl.startsWith("http") ? fullUrl : `https://${fullUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block truncate text-primary underline underline-offset-2 hover:text-primary/80"
+            >
+              {fullUrl}
+            </a>
+          ) : (
+            <span className="block truncate">{fullUrl}</span>
+          )}
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[500px] break-all">
+          {fullUrl}
         </TooltipContent>
       </Tooltip>
     </TableCell>
@@ -99,8 +126,7 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
                 <TableCell>{item.platform_name || "—"}</TableCell>
                 <TableCell>{item.strategy_name || "—"}</TableCell>
                 <TableCell>{item.temperature_name || "—"}</TableCell>
-                <TruncatedCell value={item.page} />
-                <TruncatedCell value={item.path} />
+                <UrlCell page={item.page} path={item.path} />
                 <TruncatedCell value={item.utm_source} />
                 <TruncatedCell value={item.utm_medium} />
                 <TruncatedCell value={item.utm_campaign} />
