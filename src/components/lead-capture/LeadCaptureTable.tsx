@@ -65,7 +65,7 @@ function UrlCell({ page, path }: { page: string; path: string }) {
               href={fullUrl.startsWith("http") ? fullUrl : `https://${fullUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="block truncate text-primary underline underline-offset-2 hover:text-primary/80"
+              className="block truncate text-muted-foreground underline underline-offset-2 hover:text-foreground"
             >
               {fullUrl}
             </a>
