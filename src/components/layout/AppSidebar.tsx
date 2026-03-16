@@ -40,7 +40,7 @@ export function AppSidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="font-bold text-xl tracking-tight text-accent"
+              className="font-bold text-xl tracking-tight text-sidebar-primary"
             >
               CORE.
             </motion.span>
