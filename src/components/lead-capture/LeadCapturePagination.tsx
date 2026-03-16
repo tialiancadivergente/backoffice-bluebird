@@ -2,11 +2,16 @@ import {
   Pagination, PaginationContent, PaginationItem, PaginationLink,
   PaginationNext, PaginationPrevious, PaginationEllipsis,
 } from "@/components/ui/pagination";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import type { PaginationMeta } from "@/types/lead-capture";
 
 interface Props {
   meta: PaginationMeta;
+  perPage: number;
   onPageChange: (page: number) => void;
+  onPerPageChange: (perPage: number) => void;
 }
 
 function getVisiblePages(current: number, total: number): (number | "ellipsis")[] {
@@ -27,15 +32,30 @@ function getVisiblePages(current: number, total: number): (number | "ellipsis")[
   return pages;
 }
 
-export function LeadCapturePagination({ meta, onPageChange }: Props) {
+export function LeadCapturePagination({ meta, perPage, onPageChange, onPerPageChange }: Props) {
   const { page, total_pages, total_items } = meta;
   const visiblePages = getVisiblePages(page, total_pages);
 
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm text-muted-foreground">
-        Total: <span className="font-medium text-foreground">{total_items}</span> leads
-      </p>
+      <div className="flex items-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          Total: <span className="font-medium text-foreground">{total_items}</span> leads
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Exibir</span>
+          <Select value={String(perPage)} onValueChange={(v) => onPerPageChange(Number(v))}>
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <Pagination>
         <PaginationContent>
           <PaginationItem>

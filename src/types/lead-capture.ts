@@ -47,15 +47,9 @@ export interface LeadCaptureParams {
   per_page: number;
   start_date?: string;
   end_date?: string;
-  launch_id: string;
-  temperature_id: string;
-  season_id: string;
 }
 
 export interface LeadExportParams {
   start_date?: string;
   end_date?: string;
-  launch_id: string;
-  temperature_id: string;
-  season_id: string;
 }
