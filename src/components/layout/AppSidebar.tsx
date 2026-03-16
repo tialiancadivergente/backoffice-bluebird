@@ -48,7 +48,7 @@ export function AppSidebar() {
         </AnimatePresence>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          className="p-1.5 rounded-md hover:bg-sidebar-accent/20 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground"
         >
           <ChevronLeft
             className={cn(
