@@ -20,6 +20,8 @@ const columns = [
   { key: "platform_name", label: "Plataforma" },
   { key: "strategy_name", label: "Estratégia" },
   { key: "temperature_name", label: "Temperatura" },
+  { key: "page", label: "Page" },
+  { key: "path", label: "Path" },
   { key: "full_url", label: "URL" },
   { key: "utm_source", label: "UTM Source" },
   { key: "utm_medium", label: "UTM Medium" },
@@ -126,6 +128,8 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
                 <TableCell>{item.platform_name || "—"}</TableCell>
                 <TableCell>{item.strategy_name || "—"}</TableCell>
                 <TableCell>{item.temperature_name || "—"}</TableCell>
+                <TruncatedCell value={item.page} />
+                <TruncatedCell value={item.path} />
                 <UrlCell page={item.page} path={item.path} />
                 <TruncatedCell value={item.utm_source} />
                 <TruncatedCell value={item.utm_medium} />
