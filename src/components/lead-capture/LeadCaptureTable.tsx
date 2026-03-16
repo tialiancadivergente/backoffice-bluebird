@@ -51,6 +51,34 @@ function TruncatedCell({ value }: { value: string }) {
   );
 }
 
+function UrlCell({ page, path }: { page: string; path: string }) {
+  const fullUrl = page && path ? `${page}${path}` : page || path || "—";
+  const isLink = page && path;
+  return (
+    <TableCell className="max-w-[280px]">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {isLink ? (
+            <a
+              href={fullUrl.startsWith("http") ? fullUrl : `https://${fullUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block truncate text-primary underline underline-offset-2 hover:text-primary/80"
+            >
+              {fullUrl}
+            </a>
+          ) : (
+            <span className="block truncate">{fullUrl}</span>
+          )}
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[500px] break-all">
+          {fullUrl}
+        </TooltipContent>
+      </Tooltip>
+    </TableCell>
+  );
+}
+
 export function LeadCaptureTable({ items, isLoading, isError }: Props) {
   if (isError) {
     return (
