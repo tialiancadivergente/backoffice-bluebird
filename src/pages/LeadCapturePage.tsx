@@ -126,11 +126,11 @@ export default function LeadCapturePage() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleExportCsv} disabled={exporting !== null}>
               <FileText className="mr-2 h-4 w-4" />
-              Exportar CSV
+              CSV
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleExportExcel} disabled={exporting !== null}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Exportar Excel
+              Excel
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
