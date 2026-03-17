@@ -7,35 +7,44 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchTemperatures } from "@/api/lead-capture";
+import { fetchTemperatures, fetchLaunches } from "@/api/lead-capture";
 
 interface LeadCaptureFiltersProps {
   startDate: Date | undefined;
   endDate: Date | undefined;
   temperatureId: string | undefined;
+  launchId: string | undefined;
   onStartDateChange: (date: Date | undefined) => void;
   onEndDateChange: (date: Date | undefined) => void;
   onTemperatureChange: (id: string | undefined) => void;
+  onLaunchChange: (id: string | undefined) => void;
 }
 
 export function LeadCaptureFilters({
   startDate,
   endDate,
   temperatureId,
+  launchId,
   onStartDateChange,
   onEndDateChange,
   onTemperatureChange,
+  onLaunchChange,
 }: LeadCaptureFiltersProps) {
   const { data: temperatures = [] } = useQuery({
     queryKey: ["temperatures"],
     queryFn: fetchTemperatures,
   });
 
+  const { data: launches = [] } = useQuery({
+    queryKey: ["launches"],
+    queryFn: fetchLaunches,
+  });
+
   return (
     <div className="flex flex-wrap items-end gap-4">
       {/* Start Date */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-foreground">Data Início</label>
+        <label className="text-[11px] font-medium text-foreground">Data Início</label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -64,7 +73,7 @@ export function LeadCaptureFilters({
 
       {/* End Date */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-foreground">Data Fim</label>
+        <label className="text-[11px] font-medium text-foreground">Data Fim</label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -93,7 +102,7 @@ export function LeadCaptureFilters({
 
       {/* Temperature */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-foreground">Temperatura</label>
+        <label className="text-[11px] font-medium text-foreground">Temperatura</label>
         <Select
           value={temperatureId ?? "all"}
           onValueChange={(val) => onTemperatureChange(val === "all" ? undefined : val)}
@@ -106,6 +115,27 @@ export function LeadCaptureFilters({
             {temperatures.map((t) => (
               <SelectItem key={t.id} value={t.id}>
                 {t.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Launch */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-medium text-foreground">Launch</label>
+        <Select
+          value={launchId ?? "all"}
+          onValueChange={(val) => onLaunchChange(val === "all" ? undefined : val)}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            {launches.map((l) => (
+              <SelectItem key={l.id} value={l.id}>
+                {l.name}
               </SelectItem>
             ))}
           </SelectContent>
