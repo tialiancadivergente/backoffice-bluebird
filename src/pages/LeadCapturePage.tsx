@@ -29,6 +29,7 @@ export default function LeadCapturePage() {
   const [perPage, setPerPage] = useState(10);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [temperatureId, setTemperatureId] = useState<string | undefined>(undefined);
   const [exporting, setExporting] = useState<"csv" | "excel" | null>(null);
 
   const params: LeadCaptureParams = {
@@ -36,11 +37,13 @@ export default function LeadCapturePage() {
     per_page: perPage,
     ...(startDate ? { start_date: toDateStr(startDate) } : {}),
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
+    ...(temperatureId ? { temperature_id: temperatureId } : {}),
   };
 
   const exportParams: LeadExportParams = {
     ...(startDate ? { start_date: toDateStr(startDate) } : {}),
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
+    ...(temperatureId ? { temperature_id: temperatureId } : {}),
   };
 
   const { data, isLoading, isError } = useLeadCaptures(params);
@@ -93,8 +96,10 @@ export default function LeadCapturePage() {
         <LeadCaptureFilters
           startDate={startDate}
           endDate={endDate}
+          temperatureId={temperatureId}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
+          onTemperatureChange={(id) => { setTemperatureId(id); setPage(1); }}
         />
         <div className="flex gap-2">
           <Button

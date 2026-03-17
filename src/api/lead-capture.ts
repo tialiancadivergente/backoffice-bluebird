@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { LeadCaptureParams, LeadCaptureResponse, LeadExportParams } from "@/types/lead-capture";
+import type { LeadCaptureParams, LeadCaptureResponse, LeadExportParams, Temperature } from "@/types/lead-capture";
 
 const leadCaptureClient = axios.create({
   baseURL: "https://leads-api.aliancadivergente.com.br",
@@ -29,5 +29,10 @@ export async function exportLeadsExcel(params: LeadExportParams): Promise<Blob> 
     params,
     responseType: "blob",
   });
+  return data;
+}
+
+export async function fetchTemperatures(): Promise<Temperature[]> {
+  const { data } = await leadCaptureClient.get<Temperature[]>("/temperature");
   return data;
 }

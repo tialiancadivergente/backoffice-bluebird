@@ -47,9 +47,17 @@ export interface LeadCaptureParams {
   per_page: number;
   start_date?: string;
   end_date?: string;
+  temperature_id?: string;
 }
 
 export interface LeadExportParams {
   start_date?: string;
   end_date?: string;
+  temperature_id?: string;
+}
+
+export interface Temperature {
+  id: string;
+  name: string;
+  abbreviation: string;
 }
