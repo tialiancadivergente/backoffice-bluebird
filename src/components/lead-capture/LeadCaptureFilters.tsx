@@ -93,7 +93,7 @@ export function LeadCaptureFilters({
 
       {/* Temperature */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Temperatura</label>
+        <label className="text-xs font-medium text-foreground">Temperatura</label>
         <Select
           value={temperatureId ?? "all"}
           onValueChange={(val) => onTemperatureChange(val === "all" ? undefined : val)}
