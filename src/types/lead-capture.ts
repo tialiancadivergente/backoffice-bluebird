@@ -61,3 +61,8 @@ export interface Temperature {
   name: string;
   abbreviation: string;
 }
+
+export interface Launch {
+  id: string;
+  name: string;
+}
