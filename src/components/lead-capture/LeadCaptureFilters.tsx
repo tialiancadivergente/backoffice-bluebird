@@ -34,7 +34,7 @@ export function LeadCaptureFilters({
   return (
     <div className="flex flex-wrap items-end gap-4">
       {/* Start Date */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-foreground">Data Início</label>
         <Popover>
           <PopoverTrigger asChild>
