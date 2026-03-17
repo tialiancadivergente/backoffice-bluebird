@@ -31,3 +31,8 @@ export async function exportLeadsExcel(params: LeadExportParams): Promise<Blob> 
   });
   return data;
 }
+
+export async function fetchTemperatures(): Promise<Temperature[]> {
+  const { data } = await leadCaptureClient.get<Temperature[]>("/temperature");
+  return data;
+}
