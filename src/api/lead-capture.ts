@@ -41,3 +41,10 @@ export async function fetchLaunches(): Promise<Launch[]> {
   const { data } = await leadCaptureClient.get<Launch[]>("/launch");
   return data;
 }
+
+export async function fetchSeasons(launchId: string): Promise<Season[]> {
+  const { data } = await leadCaptureClient.get<Season[]>("/season", {
+    params: { launch_id: launchId },
+  });
+  return data;
+}
