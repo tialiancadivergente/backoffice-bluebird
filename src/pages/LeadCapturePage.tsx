@@ -31,6 +31,7 @@ export default function LeadCapturePage() {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [temperatureId, setTemperatureId] = useState<string | undefined>(undefined);
   const [launchId, setLaunchId] = useState<string | undefined>(undefined);
+  const [seasonId, setSeasonId] = useState<string | undefined>(undefined);
   const [exporting, setExporting] = useState<"csv" | "excel" | null>(null);
 
   const params: LeadCaptureParams = {
@@ -40,6 +41,7 @@ export default function LeadCapturePage() {
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
     ...(temperatureId ? { temperature_id: temperatureId } : {}),
     ...(launchId ? { launch_id: launchId } : {}),
+    ...(launchId && seasonId ? { season_id: seasonId } : {}),
   };
 
   const exportParams: LeadExportParams = {
@@ -47,6 +49,7 @@ export default function LeadCapturePage() {
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
     ...(temperatureId ? { temperature_id: temperatureId } : {}),
     ...(launchId ? { launch_id: launchId } : {}),
+    ...(launchId && seasonId ? { season_id: seasonId } : {}),
   };
 
   const { data, isLoading, isError } = useLeadCaptures(params);
