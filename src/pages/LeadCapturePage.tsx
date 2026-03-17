@@ -104,10 +104,12 @@ export default function LeadCapturePage() {
           endDate={endDate}
           temperatureId={temperatureId}
           launchId={launchId}
+          seasonId={seasonId}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onTemperatureChange={(id) => { setTemperatureId(id); setPage(1); }}
-          onLaunchChange={(id) => { setLaunchId(id); setPage(1); }}
+          onLaunchChange={(id) => { setLaunchId(id); setSeasonId(undefined); setPage(1); }}
+          onSeasonChange={(id) => { setSeasonId(id); setPage(1); }}
         />
         <div className="flex gap-2">
           <Button
