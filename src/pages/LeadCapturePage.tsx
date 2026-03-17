@@ -117,26 +117,23 @@ export default function LeadCapturePage() {
           onLaunchChange={(id) => { setLaunchId(id); setSeasonId(undefined); setPage(1); }}
           onSeasonChange={(id) => { setSeasonId(id); setPage(1); }}
         />
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={exporting !== null}
-            onClick={handleExportCsv}
-          >
-            {exporting === "csv" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            CSV
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={exporting !== null}
-            onClick={handleExportExcel}
-          >
-            {exporting === "excel" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-2 h-4 w-4" />}
-            Excel
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" disabled={exporting !== null}>
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportCsv} disabled={exporting !== null}>
+              <FileText className="mr-2 h-4 w-4" />
+              Exportar CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportExcel} disabled={exporting !== null}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Exportar Excel
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <LeadCaptureTable items={items} isLoading={isLoading} isError={isError} />
