@@ -36,3 +36,8 @@ export async function fetchTemperatures(): Promise<Temperature[]> {
   const { data } = await leadCaptureClient.get<Temperature[]>("/temperature");
   return data;
 }
+
+export async function fetchLaunches(): Promise<Launch[]> {
+  const { data } = await leadCaptureClient.get<Launch[]>("/launch");
+  return data;
+}
