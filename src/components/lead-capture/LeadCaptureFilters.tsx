@@ -92,7 +92,7 @@ export function LeadCaptureFilters({
       </div>
 
       {/* Temperature */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-foreground">Temperatura</label>
         <Select
           value={temperatureId ?? "all"}
