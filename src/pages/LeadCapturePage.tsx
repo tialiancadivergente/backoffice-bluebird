@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import { useLeadCaptures } from "@/hooks/use-lead-captures";
 import { LeadCaptureTable } from "@/components/lead-capture/LeadCaptureTable";
 import { LeadCapturePagination } from "@/components/lead-capture/LeadCapturePagination";
