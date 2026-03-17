@@ -30,6 +30,7 @@ export default function LeadCapturePage() {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [temperatureId, setTemperatureId] = useState<string | undefined>(undefined);
+  const [launchId, setLaunchId] = useState<string | undefined>(undefined);
   const [exporting, setExporting] = useState<"csv" | "excel" | null>(null);
 
   const params: LeadCaptureParams = {
