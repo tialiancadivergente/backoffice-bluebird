@@ -6,6 +6,12 @@ import { LeadCaptureTable } from "@/components/lead-capture/LeadCaptureTable";
 import { LeadCapturePagination } from "@/components/lead-capture/LeadCapturePagination";
 import { LeadCaptureFilters } from "@/components/lead-capture/LeadCaptureFilters";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { exportLeadsCsv, exportLeadsExcel } from "@/api/lead-capture";
 import { toast } from "sonner";
 import type { LeadCaptureParams, LeadExportParams } from "@/types/lead-capture";
