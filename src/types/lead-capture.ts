@@ -68,3 +68,8 @@ export interface Launch {
   id: string;
   name: string;
 }
+
+export interface Season {
+  id: string;
+  name: string;
+}
