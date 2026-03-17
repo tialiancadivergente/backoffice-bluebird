@@ -13,6 +13,7 @@ interface Props {
 
 const columns = [
   { key: "created_at", label: "Data" },
+  { key: "name", label: "Nome" },
   { key: "person_email", label: "Email" },
   { key: "person_phone", label: "Telefone" },
   { key: "launch_name", label: "Launch" },
