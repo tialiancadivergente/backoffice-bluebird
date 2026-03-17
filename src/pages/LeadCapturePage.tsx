@@ -104,7 +104,7 @@ export default function LeadCapturePage() {
         <p className="text-muted-foreground text-sm mt-1">Gerencie e visualize os leads capturados.</p>
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <LeadCaptureFilters
           startDate={startDate}
           endDate={endDate}
