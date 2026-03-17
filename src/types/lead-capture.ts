@@ -57,6 +57,7 @@ export interface LeadExportParams {
   end_date?: string;
   temperature_id?: string;
   launch_id?: string;
+  season_id?: string;
 }
 
 export interface Temperature {
