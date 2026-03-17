@@ -1,5 +1,6 @@
 export interface LeadCapture {
   id: string;
+  name: string;
   page: string;
   path: string;
   utm_source: string;

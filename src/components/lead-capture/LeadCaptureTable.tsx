@@ -122,6 +122,7 @@ export function LeadCaptureTable({ items, isLoading, isError }: Props) {
             items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="whitespace-nowrap">{formatDate(item.created_at)}</TableCell>
+                <TruncatedCell value={item.name} />
                 <TableCell className="font-medium">{item.person_email || "—"}</TableCell>
                 <TableCell>{item.person_phone || "—"}</TableCell>
                 <TableCell>{item.launch_name || "—"}</TableCell>
