@@ -46,6 +46,7 @@ export default function LeadCapturePage() {
     ...(startDate ? { start_date: toDateStr(startDate) } : {}),
     ...(endDate ? { end_date: toDateStr(endDate) } : {}),
     ...(temperatureId ? { temperature_id: temperatureId } : {}),
+    ...(launchId ? { launch_id: launchId } : {}),
   };
 
   const { data, isLoading, isError } = useLeadCaptures(params);
