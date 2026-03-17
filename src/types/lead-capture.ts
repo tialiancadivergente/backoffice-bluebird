@@ -49,6 +49,7 @@ export interface LeadCaptureParams {
   end_date?: string;
   temperature_id?: string;
   launch_id?: string;
+  season_id?: string;
 }
 
 export interface LeadExportParams {
@@ -56,6 +57,7 @@ export interface LeadExportParams {
   end_date?: string;
   temperature_id?: string;
   launch_id?: string;
+  season_id?: string;
 }
 
 export interface Temperature {
@@ -65,6 +67,11 @@ export interface Temperature {
 }
 
 export interface Launch {
+  id: string;
+  name: string;
+}
+
+export interface Season {
   id: string;
   name: string;
 }

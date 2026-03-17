@@ -7,17 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchTemperatures, fetchLaunches } from "@/api/lead-capture";
+import { fetchTemperatures, fetchLaunches, fetchSeasons } from "@/api/lead-capture";
 
 interface LeadCaptureFiltersProps {
   startDate: Date | undefined;
   endDate: Date | undefined;
   temperatureId: string | undefined;
   launchId: string | undefined;
+  seasonId: string | undefined;
   onStartDateChange: (date: Date | undefined) => void;
   onEndDateChange: (date: Date | undefined) => void;
   onTemperatureChange: (id: string | undefined) => void;
   onLaunchChange: (id: string | undefined) => void;
+  onSeasonChange: (id: string | undefined) => void;
 }
 
 export function LeadCaptureFilters({
@@ -25,10 +27,12 @@ export function LeadCaptureFilters({
   endDate,
   temperatureId,
   launchId,
+  seasonId,
   onStartDateChange,
   onEndDateChange,
   onTemperatureChange,
   onLaunchChange,
+  onSeasonChange,
 }: LeadCaptureFiltersProps) {
   const { data: temperatures = [] } = useQuery({
     queryKey: ["temperatures"],
@@ -38,6 +42,12 @@ export function LeadCaptureFilters({
   const { data: launches = [] } = useQuery({
     queryKey: ["launches"],
     queryFn: fetchLaunches,
+  });
+
+  const { data: seasons = [] } = useQuery({
+    queryKey: ["seasons", launchId],
+    queryFn: () => fetchSeasons(launchId!),
+    enabled: !!launchId,
   });
 
   return (
@@ -136,6 +146,28 @@ export function LeadCaptureFilters({
             {launches.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Season */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-medium text-foreground">Season</label>
+        <Select
+          value={seasonId ?? "all"}
+          onValueChange={(val) => onSeasonChange(val === "all" ? undefined : val)}
+          disabled={!launchId}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder={!launchId ? "Selecione um Launch" : "Todos"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            {seasons.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.name}
               </SelectItem>
             ))}
           </SelectContent>
