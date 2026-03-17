@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { LeadCaptureParams, LeadCaptureResponse, LeadExportParams } from "@/types/lead-capture";
+import type { LeadCaptureParams, LeadCaptureResponse, LeadExportParams, Temperature } from "@/types/lead-capture";
 
 const leadCaptureClient = axios.create({
   baseURL: "https://leads-api.aliancadivergente.com.br",
