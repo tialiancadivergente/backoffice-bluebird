@@ -63,7 +63,7 @@ export function LeadCaptureFilters({
       </div>
 
       {/* End Date */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-foreground">Data Fim</label>
         <Popover>
           <PopoverTrigger asChild>
