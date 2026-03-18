@@ -30,11 +30,13 @@ export function LeadCaptureFilters({
   temperatureId,
   launchId,
   seasonId,
+  quizAnswered,
   onStartDateChange,
   onEndDateChange,
   onTemperatureChange,
   onLaunchChange,
   onSeasonChange,
+  onQuizAnsweredChange,
 }: LeadCaptureFiltersProps) {
   const { data: temperatures = [] } = useQuery({
     queryKey: ["temperatures"],
