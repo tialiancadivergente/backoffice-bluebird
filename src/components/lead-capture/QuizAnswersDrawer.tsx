@@ -63,6 +63,16 @@ export function QuizAnswersDrawer({ captureId, leadName, open, onOpenChange }: P
               </span>
             )}
           </SheetDescription>
+          {data && (
+            <div className="flex items-center gap-3 mt-2">
+              <Badge variant="outline" className="text-xs">
+                Score: {data.score_total}
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                Faixa: {data.faixa}
+              </Badge>
+            </div>
+          )}
         </SheetHeader>
 
         <Separator />
