@@ -114,11 +114,13 @@ export default function LeadCapturePage() {
           temperatureId={temperatureId}
           launchId={launchId}
           seasonId={seasonId}
+          quizAnswered={quizAnswered}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onTemperatureChange={(id) => { setTemperatureId(id); setPage(1); }}
           onLaunchChange={(id) => { setLaunchId(id); setSeasonId(undefined); setPage(1); }}
           onSeasonChange={(id) => { setSeasonId(id); setPage(1); }}
+          onQuizAnsweredChange={(val) => { setQuizAnswered(val); setPage(1); }}
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

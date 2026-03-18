@@ -177,6 +177,24 @@ export function LeadCaptureFilters({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Quiz Answered */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-medium text-foreground">Quiz</label>
+        <Select
+          value={quizAnswered ?? "all"}
+          onValueChange={(val) => onQuizAnsweredChange(val === "all" ? undefined : val)}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="true">Respondeu</SelectItem>
+            <SelectItem value="false">Não respondeu</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }
