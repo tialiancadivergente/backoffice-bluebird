@@ -52,6 +52,7 @@ export interface LeadCaptureParams {
   temperature_id?: string;
   launch_id?: string;
   season_id?: string;
+  quiz_answered?: string;
 }
 
 export interface LeadExportParams {
