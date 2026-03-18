@@ -82,7 +82,7 @@ export function QuizAnswersDrawer({ captureId, leadName, open, onOpenChange }: P
 
           {data && (
             <div className="space-y-4">
-              {data.answers.map((answer, index) => (
+              {[...data.answers].sort((a, b) => a.question_key.localeCompare(b.question_key, undefined, { numeric: true })).map((answer, index) => (
                 <div
                   key={answer.form_answer_id}
                   className="rounded-lg border border-border bg-muted/30 p-4 space-y-2"
