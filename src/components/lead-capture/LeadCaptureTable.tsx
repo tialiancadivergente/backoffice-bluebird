@@ -3,6 +3,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckCircle2, CircleDashed } from "lucide-react";
 import type { LeadCapture } from "@/types/lead-capture";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const columns = [
+  { key: "quiz_answered", label: "Quiz" },
   { key: "created_at", label: "Data" },
   { key: "name", label: "Nome" },
   { key: "person_email", label: "Email" },
