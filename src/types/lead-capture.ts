@@ -1,4 +1,5 @@
 export interface LeadCapture {
+  quiz_answered: boolean;
   id: string;
   name: string;
   page: string;
