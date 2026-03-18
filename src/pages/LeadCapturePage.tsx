@@ -38,6 +38,7 @@ export default function LeadCapturePage() {
   const [temperatureId, setTemperatureId] = useState<string | undefined>(undefined);
   const [launchId, setLaunchId] = useState<string | undefined>(undefined);
   const [seasonId, setSeasonId] = useState<string | undefined>(undefined);
+  const [quizAnswered, setQuizAnswered] = useState<string | undefined>(undefined);
   const [exporting, setExporting] = useState<"csv" | "excel" | null>(null);
 
   const params: LeadCaptureParams = {
