@@ -19,5 +19,7 @@ export interface QuizAnswersResponse {
   form_version_id: string;
   form_response_id: string;
   submitted_at: string;
+  score_total: number;
+  faixa: string;
   answers: QuizAnswer[];
 }
