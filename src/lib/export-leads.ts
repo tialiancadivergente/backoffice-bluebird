@@ -23,7 +23,7 @@ const HEADERS: { key: keyof LeadCapture; label: string }[] = [
 function toRows(items: LeadCapture[]) {
   return items.map((item) =>
     HEADERS.reduce((row, h) => {
-      row[h.label] = item[h.key] || "—";
+      row[h.label] = String(item[h.key] ?? "—");
       return row;
     }, {} as Record<string, string>)
   );
