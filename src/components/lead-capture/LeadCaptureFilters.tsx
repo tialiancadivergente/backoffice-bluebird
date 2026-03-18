@@ -15,11 +15,13 @@ interface LeadCaptureFiltersProps {
   temperatureId: string | undefined;
   launchId: string | undefined;
   seasonId: string | undefined;
+  quizAnswered: string | undefined;
   onStartDateChange: (date: Date | undefined) => void;
   onEndDateChange: (date: Date | undefined) => void;
   onTemperatureChange: (id: string | undefined) => void;
   onLaunchChange: (id: string | undefined) => void;
   onSeasonChange: (id: string | undefined) => void;
+  onQuizAnsweredChange: (val: string | undefined) => void;
 }
 
 export function LeadCaptureFilters({
