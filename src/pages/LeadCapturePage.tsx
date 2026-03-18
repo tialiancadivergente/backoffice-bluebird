@@ -49,6 +49,7 @@ export default function LeadCapturePage() {
     ...(temperatureId ? { temperature_id: temperatureId } : {}),
     ...(launchId ? { launch_id: launchId } : {}),
     ...(launchId && seasonId ? { season_id: seasonId } : {}),
+    ...(quizAnswered ? { quiz_answered: quizAnswered } : {}),
   };
 
   const exportParams: LeadExportParams = {
@@ -57,6 +58,7 @@ export default function LeadCapturePage() {
     ...(temperatureId ? { temperature_id: temperatureId } : {}),
     ...(launchId ? { launch_id: launchId } : {}),
     ...(launchId && seasonId ? { season_id: seasonId } : {}),
+    ...(quizAnswered ? { quiz_answered: quizAnswered } : {}),
   };
 
   const { data, isLoading, isError } = useLeadCaptures(params);
