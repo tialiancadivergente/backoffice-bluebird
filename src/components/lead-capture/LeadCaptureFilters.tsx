@@ -15,11 +15,13 @@ interface LeadCaptureFiltersProps {
   temperatureId: string | undefined;
   launchId: string | undefined;
   seasonId: string | undefined;
+  quizAnswered: string | undefined;
   onStartDateChange: (date: Date | undefined) => void;
   onEndDateChange: (date: Date | undefined) => void;
   onTemperatureChange: (id: string | undefined) => void;
   onLaunchChange: (id: string | undefined) => void;
   onSeasonChange: (id: string | undefined) => void;
+  onQuizAnsweredChange: (val: string | undefined) => void;
 }
 
 export function LeadCaptureFilters({
@@ -28,11 +30,13 @@ export function LeadCaptureFilters({
   temperatureId,
   launchId,
   seasonId,
+  quizAnswered,
   onStartDateChange,
   onEndDateChange,
   onTemperatureChange,
   onLaunchChange,
   onSeasonChange,
+  onQuizAnsweredChange,
 }: LeadCaptureFiltersProps) {
   const { data: temperatures = [] } = useQuery({
     queryKey: ["temperatures"],
@@ -170,6 +174,24 @@ export function LeadCaptureFilters({
                 {s.name}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Quiz Answered */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-medium text-foreground">Quiz</label>
+        <Select
+          value={quizAnswered ?? "all"}
+          onValueChange={(val) => onQuizAnsweredChange(val === "all" ? undefined : val)}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="true">Respondeu</SelectItem>
+            <SelectItem value="false">Não respondeu</SelectItem>
           </SelectContent>
         </Select>
       </div>
