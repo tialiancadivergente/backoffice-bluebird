@@ -102,28 +102,6 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 py-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-sidebar-accent/20 flex items-center justify-center shrink-0">
-            <span className="text-xs font-semibold text-sidebar-accent">A</span>
-          </div>
-          <AnimatePresence mode="wait">
-            {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="overflow-hidden"
-              >
-                <p className="text-sm font-medium text-sidebar-foreground truncate">Admin</p>
-                <p className="text-xs text-sidebar-foreground/50 truncate">admin@core.app</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
     </motion.aside>
   );
 }
