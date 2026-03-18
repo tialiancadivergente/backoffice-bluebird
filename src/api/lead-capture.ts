@@ -49,3 +49,8 @@ export async function fetchSeasons(launchId: string): Promise<Season[]> {
   });
   return data;
 }
+
+export async function fetchQuizAnswers(captureId: string): Promise<QuizAnswersResponse> {
+  const { data } = await leadCaptureClient.get<QuizAnswersResponse>(`/capture/${captureId}/quiz-answers`);
+  return data;
+}
