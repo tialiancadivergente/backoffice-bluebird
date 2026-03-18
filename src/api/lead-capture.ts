@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { LeadCaptureParams, LeadCaptureResponse, LeadExportParams, Temperature, Launch, Season } from "@/types/lead-capture";
+import type { QuizAnswersResponse } from "@/types/quiz-answers";
 
 const leadCaptureClient = axios.create({
   baseURL: "https://leads-api.aliancadivergente.com.br",
@@ -46,5 +47,10 @@ export async function fetchSeasons(launchId: string): Promise<Season[]> {
   const { data } = await leadCaptureClient.get<Season[]>("/season", {
     params: { launch_id: launchId },
   });
+  return data;
+}
+
+export async function fetchQuizAnswers(captureId: string): Promise<QuizAnswersResponse> {
+  const { data } = await leadCaptureClient.get<QuizAnswersResponse>(`/capture/${captureId}/quiz-answers`);
   return data;
 }
