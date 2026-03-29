@@ -36,9 +36,9 @@ export default function VoteCampaignDetailPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ type: "category" | "candidate"; id: string; name: string } | null>(null);
 
   const campaignQuery = useQuery({
-    queryKey: ["vote-campaign", id],
-    queryFn: () => fetchVoteCampaign(id!),
-    enabled: !!id,
+    queryKey: ["vote-campaigns"],
+    queryFn: fetchVoteCampaigns,
+    select: (campaigns) => campaigns.find((c) => c.id === id),
   });
 
   const categoriesQuery = useQuery({
