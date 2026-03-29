@@ -14,10 +14,6 @@ export async function fetchVoteCampaigns(): Promise<VoteCampaign[]> {
   return data;
 }
 
-export async function fetchVoteCampaign(id: string): Promise<VoteCampaign> {
-  const { data } = await votingClient.get<VoteCampaign>(`/v1/voting/admin/campaigns/${id}`);
-  return data;
-}
 
 export async function createVoteCampaign(payload: CreateVoteCampaignPayload): Promise<VoteCampaign> {
   const { data } = await votingClient.post<VoteCampaign>("/v1/voting/admin/campaigns", payload);
