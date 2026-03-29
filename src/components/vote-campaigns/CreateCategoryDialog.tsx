@@ -37,7 +37,7 @@ export function CreateCategoryDialog({ campaignId, open, onOpenChange }: Props) 
   });
 
   const mutation = useMutation({
-    mutationFn: (values: Values) => createCategory(campaignId, values),
+    mutationFn: (values: Values) => createCategory(campaignId, { name: values.name, slug: values.slug, description: values.description }),
     onSuccess: () => {
       toast.success("Categoria criada!");
       queryClient.invalidateQueries({ queryKey: ["vote-campaign-categories", campaignId] });
