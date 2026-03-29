@@ -57,11 +57,12 @@ export async function deleteCategory(campaignId: string, categoryId: string): Pr
 export interface VoteCandidate {
   id: string;
   name: string;
-  slug: string;
-  description: string;
-  image_url: string;
+  story_text: string;
+  photo_url: string;
   category_id: string;
   campaign_id: string;
+  display_order: number;
+  active: boolean;
   vote_count: number;
   created_at: string;
   updated_at: string;
