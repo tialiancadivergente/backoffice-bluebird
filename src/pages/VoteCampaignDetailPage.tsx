@@ -12,7 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  fetchVoteCampaign, fetchCategories, fetchCandidates,
+  fetchVoteCampaigns, fetchCategories, fetchCandidates,
   deleteCategory, deleteCandidate,
   type VoteCategory, type VoteCandidate,
 } from "@/api/vote-campaigns";
