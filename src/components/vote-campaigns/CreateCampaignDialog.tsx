@@ -70,7 +70,11 @@ export function CreateCampaignDialog({ open, onOpenChange }: Props) {
 
   const onSubmit = (values: FormValues) => {
     mutation.mutate({
-      ...values,
+      slug: values.slug,
+      name: values.name,
+      description: values.description,
+      status: values.status,
+      active: values.active,
       starts_at: values.starts_at.toISOString(),
       ends_at: values.ends_at.toISOString(),
     });
