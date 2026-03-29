@@ -40,15 +40,12 @@ function ActiveBadge({ active }: { active: boolean }) {
 
 const columns = [
   { key: "name", label: "Nome" },
-  { key: "slug", label: "Slug" },
-  { key: "status", label: "Status" },
   { key: "active", label: "Ativo" },
   { key: "starts_at", label: "Início" },
   { key: "ends_at", label: "Fim" },
   { key: "category_count", label: "Categorias" },
   { key: "candidate_count", label: "Candidatos" },
   { key: "vote_count", label: "Votos" },
-  { key: "created_at", label: "Criado em" },
 ] as const;
 
 export function VoteCampaignTable({ items, isLoading, isError }: Props) {
@@ -91,15 +88,12 @@ export function VoteCampaignTable({ items, isLoading, isError }: Props) {
             items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="text-muted-foreground">{item.slug}</TableCell>
-                <TableCell><StatusBadge status={item.status} /></TableCell>
                 <TableCell><ActiveBadge active={item.active} /></TableCell>
                 <TableCell className="whitespace-nowrap">{formatDate(item.starts_at)}</TableCell>
                 <TableCell className="whitespace-nowrap">{formatDate(item.ends_at)}</TableCell>
                 <TableCell className="text-center">{item.category_count}</TableCell>
                 <TableCell className="text-center">{item.candidate_count}</TableCell>
                 <TableCell className="text-center">{item.vote_count}</TableCell>
-                <TableCell className="whitespace-nowrap">{formatDateTime(item.created_at)}</TableCell>
               </TableRow>
             ))
           )}
