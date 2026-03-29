@@ -23,6 +23,7 @@ const App = () => (
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/lead-capture" element={<LeadCapturePage />} />
+              <Route path="/vote-campaigns" element={<VoteCampaignsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

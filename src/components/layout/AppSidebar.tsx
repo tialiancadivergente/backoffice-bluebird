@@ -14,6 +14,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Target, label: "Lead Capture", href: "/lead-capture" },
+  { icon: Vote, label: "Vote Campaigns", href: "/vote-campaigns" },
 ];
 
 const sidebarVariants = {
