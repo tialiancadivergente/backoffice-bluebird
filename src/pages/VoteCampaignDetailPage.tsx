@@ -157,51 +157,49 @@ export default function VoteCampaignDetailPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead className="w-16">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categoriesQuery.isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                  </TableRow>
-                ))
-              ) : categories.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
-                    Nenhuma categoria cadastrada.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                categories.map((cat) => (
-                  <TableRow key={cat.id}>
-                    <TableCell className="font-medium">{cat.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{cat.slug}</TableCell>
-                    <TableCell className="text-muted-foreground">{cat.description}</TableCell>
-                    <TableCell>
+          {categoriesQuery.isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
+            <p className="text-center text-muted-foreground py-6">Nenhuma categoria cadastrada.</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {categories.map((cat) => {
+                const catCandidates = candidates.filter((c) => c.category_id === cat.id);
+                const totalVotes = catCandidates.reduce((sum, c) => sum + c.vote_count, 0);
+                return (
+                  <Card key={cat.id} className="border bg-muted/30">
+                    <CardHeader className="flex flex-row items-start justify-between pb-2">
+                      <div className="space-y-1">
+                        <CardTitle className="text-base">{cat.name}</CardTitle>
+                        <p className="text-xs text-muted-foreground font-mono">{cat.slug}</p>
+                      </div>
                       <Button
                         variant="ghost" size="icon"
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive h-8 w-8"
                         onClick={() => setDeleteTarget({ type: "category", id: cat.id, name: cat.name })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {cat.description && (
+                        <p className="text-sm text-muted-foreground">{cat.description}</p>
+                      )}
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        <span><strong className="text-foreground">{catCandidates.length}</strong> candidato(s)</span>
+                        <span><strong className="text-foreground">{totalVotes}</strong> voto(s)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Criada em {formatDate(cat.created_at)}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -214,54 +212,61 @@ export default function VoteCampaignDetailPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Votos</TableHead>
-                <TableHead className="w-16">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {candidatesQuery.isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                  </TableRow>
-                ))
-              ) : candidates.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
-                    Nenhum candidato cadastrado.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                candidates.map((cand) => {
-                  const catName = categories.find((c) => c.id === cand.category_id)?.name ?? "—";
-                  return (
-                    <TableRow key={cand.id}>
-                      <TableCell className="font-medium">{cand.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{catName}</TableCell>
-                      <TableCell className="text-center">{cand.vote_count}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost" size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteTarget({ type: "candidate", id: cand.id, name: cand.name })}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+          {candidatesQuery.isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : candidates.length === 0 ? (
+            <p className="text-center text-muted-foreground py-6">Nenhum candidato cadastrado.</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {candidates.map((cand) => {
+                const catName = categories.find((c) => c.id === cand.category_id)?.name ?? "—";
+                return (
+                  <Card key={cand.id} className="border bg-muted/30">
+                    <CardHeader className="flex flex-row items-start justify-between pb-2">
+                      <div className="flex items-center gap-3">
+                        {cand.image_url ? (
+                          <img
+                            src={cand.image_url}
+                            alt={cand.name}
+                            className="h-10 w-10 rounded-full object-cover border"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-muted-foreground border">
+                            {cand.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <CardTitle className="text-base">{cand.name}</CardTitle>
+                          <p className="text-xs text-muted-foreground font-mono">{cand.slug}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost" size="icon"
+                        className="text-destructive hover:text-destructive h-8 w-8"
+                        onClick={() => setDeleteTarget({ type: "candidate", id: cand.id, name: cand.name })}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {cand.description && (
+                        <p className="text-sm text-muted-foreground">{cand.description}</p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <Badge variant="outline" className="text-xs">{catName}</Badge>
+                        <span className="font-semibold text-foreground text-sm">{cand.vote_count} voto(s)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Criado em {formatDate(cand.created_at)}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
