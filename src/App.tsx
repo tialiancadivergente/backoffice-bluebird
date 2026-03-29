@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import DashboardPage from "@/pages/DashboardPage";
 import LeadCapturePage from "@/pages/LeadCapturePage";
 import VoteCampaignsPage from "@/pages/VoteCampaignsPage";
+import VoteCampaignDetailPage from "@/pages/VoteCampaignDetailPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
               <Route path="/" element={<DashboardPage />} />
               <Route path="/lead-capture" element={<LeadCapturePage />} />
               <Route path="/vote-campaigns" element={<VoteCampaignsPage />} />
+              <Route path="/vote-campaigns/:id" element={<VoteCampaignDetailPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
