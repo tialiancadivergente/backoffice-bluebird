@@ -5,7 +5,7 @@ import { VoteCampaignTable } from "@/components/vote-campaigns/VoteCampaignTable
 
 export default function VoteCampaignsPage() {
   const { data, isLoading, isError } = useVoteCampaigns();
-  const items = data ?? [];
+  const items = Array.isArray(data) ? data : (data as any)?.items ?? [];
 
   return (
     <div className="space-y-6">
