@@ -68,11 +68,12 @@ export interface VoteCandidate {
 }
 
 export interface CreateCandidatePayload {
-  name: string;
-  slug: string;
-  description: string;
-  image_url?: string;
   category_id: string;
+  name: string;
+  story_text: string;
+  photo_url?: string;
+  display_order: number;
+  active: boolean;
 }
 
 export async function fetchCandidates(campaignId: string): Promise<VoteCandidate[]> {
