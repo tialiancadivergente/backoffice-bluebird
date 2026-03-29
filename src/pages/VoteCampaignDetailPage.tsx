@@ -225,9 +225,9 @@ export default function VoteCampaignDetailPage() {
                   <Card key={cand.id} className="border bg-muted/30">
                     <CardHeader className="flex flex-row items-start justify-between pb-2">
                       <div className="flex items-center gap-3">
-                        {cand.image_url ? (
+                        {cand.photo_url ? (
                           <img
-                            src={cand.image_url}
+                            src={cand.photo_url}
                             alt={cand.name}
                             className="h-10 w-10 rounded-full object-cover border"
                           />
@@ -238,7 +238,6 @@ export default function VoteCampaignDetailPage() {
                         )}
                         <div>
                           <CardTitle className="text-base">{cand.name}</CardTitle>
-                          <p className="text-xs text-muted-foreground font-mono">{cand.slug}</p>
                         </div>
                       </div>
                       <Button
@@ -250,8 +249,8 @@ export default function VoteCampaignDetailPage() {
                       </Button>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {cand.description && (
-                        <p className="text-sm text-muted-foreground">{cand.description}</p>
+                      {cand.story_text && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">{cand.story_text}</p>
                       )}
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <Badge variant="outline" className="text-xs">{catName}</Badge>

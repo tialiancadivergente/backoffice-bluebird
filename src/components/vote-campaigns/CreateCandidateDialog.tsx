@@ -8,6 +8,7 @@ import { createCandidate, type VoteCategory } from "@/api/vote-campaigns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -20,10 +21,11 @@ import {
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório"),
-  slug: z.string().trim().min(1, "Slug é obrigatório"),
-  description: z.string().trim().min(1, "Descrição é obrigatória"),
-  image_url: z.string().url("URL inválida").or(z.literal("")).optional(),
+  story_text: z.string().trim().min(1, "Texto da história é obrigatório"),
+  photo_url: z.string().url("URL inválida").or(z.literal("")).optional(),
   category_id: z.string().min(1, "Categoria é obrigatória"),
+  display_order: z.coerce.number().int().min(0, "Ordem deve ser >= 0"),
+  active: z.boolean(),
 });
 
 type Values = z.infer<typeof schema>;
@@ -39,16 +41,17 @@ export function CreateCandidateDialog({ campaignId, categories, open, onOpenChan
   const queryClient = useQueryClient();
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", slug: "", description: "", image_url: "", category_id: "" },
+    defaultValues: { name: "", story_text: "", photo_url: "", category_id: "", display_order: 0, active: true },
   });
 
   const mutation = useMutation({
     mutationFn: (values: Values) => createCandidate(campaignId, {
       name: values.name,
-      slug: values.slug,
-      description: values.description,
-      image_url: values.image_url || undefined,
+      story_text: values.story_text,
+      photo_url: values.photo_url || undefined,
       category_id: values.category_id,
+      display_order: values.display_order,
+      active: values.active,
     }),
     onSuccess: () => {
       toast.success("Candidato criado!");
@@ -67,10 +70,7 @@ export function CreateCandidateDialog({ campaignId, categories, open, onOpenChan
         <Form {...form}>
           <form onSubmit={form.handleSubmit((v) => mutation.mutate(v))} className="space-y-4">
             <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem><FormLabel>Nome</FormLabel><FormControl><Input placeholder="João Silva" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="slug" render={({ field }) => (
-              <FormItem><FormLabel>Slug</FormLabel><FormControl><Input placeholder="joao-silva" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Nome</FormLabel><FormControl><Input placeholder="Fernanda Silva" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="category_id" render={({ field }) => (
               <FormItem>
@@ -86,12 +86,26 @@ export function CreateCandidateDialog({ campaignId, categories, open, onOpenChan
                 <FormMessage />
               </FormItem>
             )} />
-            <FormField control={form.control} name="description" render={({ field }) => (
-              <FormItem><FormLabel>Descrição</FormLabel><FormControl><Textarea placeholder="Descrição do candidato" rows={3} {...field} /></FormControl><FormMessage /></FormItem>
+            <FormField control={form.control} name="story_text" render={({ field }) => (
+              <FormItem><FormLabel>Texto da História</FormLabel><FormControl><Textarea placeholder="Conte a história do candidato..." rows={3} {...field} /></FormControl><FormMessage /></FormItem>
             )} />
-            <FormField control={form.control} name="image_url" render={({ field }) => (
-              <FormItem><FormLabel>URL da Imagem (opcional)</FormLabel><FormControl><Input placeholder="https://..." {...field} /></FormControl><FormMessage /></FormItem>
+            <FormField control={form.control} name="photo_url" render={({ field }) => (
+              <FormItem><FormLabel>URL da Foto (opcional)</FormLabel><FormControl><Input placeholder="https://cdn.site.com/foto.jpg" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="display_order" render={({ field }) => (
+                <FormItem><FormLabel>Ordem de Exibição</FormLabel><FormControl><Input type="number" min={0} {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="active" render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Ativo</FormLabel>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
               <Button type="submit" disabled={mutation.isPending}>
