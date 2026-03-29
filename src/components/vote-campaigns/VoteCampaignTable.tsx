@@ -40,15 +40,12 @@ function ActiveBadge({ active }: { active: boolean }) {
 
 const columns = [
   { key: "name", label: "Nome" },
-  { key: "slug", label: "Slug" },
-  { key: "status", label: "Status" },
   { key: "active", label: "Ativo" },
   { key: "starts_at", label: "Início" },
   { key: "ends_at", label: "Fim" },
   { key: "category_count", label: "Categorias" },
   { key: "candidate_count", label: "Candidatos" },
   { key: "vote_count", label: "Votos" },
-  { key: "created_at", label: "Criado em" },
 ] as const;
 
 export function VoteCampaignTable({ items, isLoading, isError }: Props) {
