@@ -88,15 +88,12 @@ export function VoteCampaignTable({ items, isLoading, isError }: Props) {
             items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="text-muted-foreground">{item.slug}</TableCell>
-                <TableCell><StatusBadge status={item.status} /></TableCell>
                 <TableCell><ActiveBadge active={item.active} /></TableCell>
                 <TableCell className="whitespace-nowrap">{formatDate(item.starts_at)}</TableCell>
                 <TableCell className="whitespace-nowrap">{formatDate(item.ends_at)}</TableCell>
                 <TableCell className="text-center">{item.category_count}</TableCell>
                 <TableCell className="text-center">{item.candidate_count}</TableCell>
                 <TableCell className="text-center">{item.vote_count}</TableCell>
-                <TableCell className="whitespace-nowrap">{formatDateTime(item.created_at)}</TableCell>
               </TableRow>
             ))
           )}
