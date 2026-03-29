@@ -13,3 +13,13 @@ export interface VoteCampaign {
   candidate_count: number;
   vote_count: number;
 }
+
+export interface CreateVoteCampaignPayload {
+  slug: string;
+  name: string;
+  description: string;
+  starts_at: string;
+  ends_at: string;
+  status: string;
+  active: boolean;
+}
