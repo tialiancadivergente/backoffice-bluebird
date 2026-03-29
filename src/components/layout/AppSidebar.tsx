@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, LayoutDashboard, Target } from "lucide-react";
+import { ChevronLeft, LayoutDashboard, Target, Vote } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoAlianca from "@/assets/logo-alianca.svg";
@@ -14,6 +14,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Target, label: "Lead Capture", href: "/lead-capture" },
+  { icon: Vote, label: "Vote Campaigns", href: "/vote-campaigns" },
 ];
 
 const sidebarVariants = {
