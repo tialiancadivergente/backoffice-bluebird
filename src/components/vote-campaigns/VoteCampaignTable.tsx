@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Trash2, Loader2 } from "lucide-react";
+import { Eye, Trash2, Loader2, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
