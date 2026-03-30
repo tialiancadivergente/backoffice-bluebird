@@ -91,17 +91,21 @@ export async function deleteCandidate(campaignId: string, candidateId: string): 
   await votingClient.delete(`/v1/voting/admin/campaigns/${campaignId}/candidates/${candidateId}`);
 }
 
-export async function fetchCampaignResults(campaignId: string): Promise<VoteCandidate[]> {
+export interface CampaignResult {
+  candidate_id: string;
+  candidate_name: string;
+  candidate_photo_url: string;
+  candidate_story_text: string;
+  category_id: string;
+  category_name: string;
+  vote_count: number;
+}
+
+export async function fetchCampaignResults(campaignId: string): Promise<CampaignResult[]> {
   const { data } = await votingClient.get(`/v1/voting/admin/campaigns/${campaignId}/results`);
-  console.log("fetchCampaignResults RAW response:", JSON.stringify(data, null, 2));
   if (Array.isArray(data)) return data;
-  if (data && typeof data === "object") {
-    for (const key of Object.keys(data)) {
-      if (Array.isArray(data[key])) {
-        console.log("fetchCampaignResults found array in key:", key);
-        return data[key];
-      }
-    }
+  if (data && typeof data === "object" && Array.isArray(data.items)) {
+    return data.items;
   }
   return [];
 }

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { fetchCampaignResults, fetchVoteCampaigns } from "@/api/vote-campaigns";
+import { fetchCampaignResults, fetchVoteCampaigns, type CampaignResult } from "@/api/vote-campaigns";
 
 export default function VoteCampaignResultsPage() {
   const { id } = useParams<{ id: string }>();
@@ -66,7 +66,7 @@ export default function VoteCampaignResultsPage() {
 
             return (
               <div
-                key={candidate.id}
+                key={candidate.candidate_id}
                 className={`flex items-center gap-4 rounded-lg border p-4 transition-colors ${
                   isTop3 ? "border-primary/30 bg-primary/5" : "border-border bg-card"
                 }`}
@@ -86,16 +86,16 @@ export default function VoteCampaignResultsPage() {
                 </div>
 
                 <Avatar className="h-12 w-12 shrink-0">
-                  <AvatarImage src={candidate.photo_url} alt={candidate.name} />
+                  <AvatarImage src={candidate.candidate_photo_url} alt={candidate.candidate_name} />
                   <AvatarFallback className="text-sm font-medium">
-                    {candidate.name?.charAt(0)?.toUpperCase()}
+                    {candidate.candidate_name?.charAt(0)?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground truncate">{candidate.name}</p>
-                  {candidate.story_text && (
-                    <p className="text-sm text-muted-foreground truncate">{candidate.story_text}</p>
+                  <p className="font-semibold text-foreground truncate">{candidate.candidate_name}</p>
+                  {candidate.candidate_story_text && (
+                    <p className="text-sm text-muted-foreground truncate">{candidate.candidate_story_text}</p>
                   )}
                 </div>
 
