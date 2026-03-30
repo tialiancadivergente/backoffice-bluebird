@@ -9,6 +9,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import LeadCapturePage from "@/pages/LeadCapturePage";
 import VoteCampaignsPage from "@/pages/VoteCampaignsPage";
 import VoteCampaignDetailPage from "@/pages/VoteCampaignDetailPage";
+import VoteCampaignResultsPage from "@/pages/VoteCampaignResultsPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
