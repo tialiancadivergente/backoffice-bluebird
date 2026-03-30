@@ -93,11 +93,15 @@ export async function deleteCandidate(campaignId: string, candidateId: string): 
 
 export async function fetchCampaignResults(campaignId: string): Promise<VoteCandidate[]> {
   const { data } = await votingClient.get(`/v1/voting/admin/campaigns/${campaignId}/results`);
+  console.log("fetchCampaignResults RAW response:", JSON.stringify(data, null, 2));
   if (Array.isArray(data)) return data;
   if (data && typeof data === "object") {
-    const arr = data.items ?? data.candidates ?? data.results ?? data.data;
-    if (Array.isArray(arr)) return arr;
+    for (const key of Object.keys(data)) {
+      if (Array.isArray(data[key])) {
+        console.log("fetchCampaignResults found array in key:", key);
+        return data[key];
+      }
+    }
   }
-  console.log("fetchCampaignResults response shape:", JSON.stringify(data, null, 2));
   return [];
 }
