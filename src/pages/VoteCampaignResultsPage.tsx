@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { fetchCampaignResults, fetchCandidates, fetchVoteCampaigns } from "@/api/vote-campaigns";
+import { fetchCampaignResults, fetchVoteCampaigns } from "@/api/vote-campaigns";
 
 export default function VoteCampaignResultsPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,31 +19,15 @@ export default function VoteCampaignResultsPage() {
 
   const campaign = (Array.isArray(campaigns) ? campaigns : []).find((c) => c.id === id);
 
-  const { data: results, isLoading: loadingResults, isError } = useQuery({
+  const { data: results, isLoading, isError } = useQuery({
     queryKey: ["vote-campaign-results", id],
     queryFn: () => fetchCampaignResults(id!),
     enabled: !!id,
   });
 
-  const { data: candidates, isLoading: loadingCandidates } = useQuery({
-    queryKey: ["vote-campaign-candidates", id],
-    queryFn: () => fetchCandidates(id!),
-    enabled: !!id,
-  });
-
-  const isLoading = loadingResults || loadingCandidates;
-
   const sorted = useMemo(() => {
-    const candidateMap = new Map(
-      (candidates ?? []).map((c) => [c.id, c])
-    );
-    return [...(results ?? [])].map((r) => ({
-      ...r,
-      name: r.name || candidateMap.get(r.id)?.name || "",
-      photo_url: r.photo_url || candidateMap.get(r.id)?.photo_url || "",
-      story_text: r.story_text || candidateMap.get(r.id)?.story_text || "",
-    })).sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0));
-  }, [results, candidates]);
+    return [...(results ?? [])].sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0));
+  }, [results]);
 
   return (
     <div className="space-y-6">
