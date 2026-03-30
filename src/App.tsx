@@ -9,6 +9,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import LeadCapturePage from "@/pages/LeadCapturePage";
 import VoteCampaignsPage from "@/pages/VoteCampaignsPage";
 import VoteCampaignDetailPage from "@/pages/VoteCampaignDetailPage";
+import VoteCampaignResultsPage from "@/pages/VoteCampaignResultsPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/lead-capture" element={<LeadCapturePage />} />
               <Route path="/vote-campaigns" element={<VoteCampaignsPage />} />
               <Route path="/vote-campaigns/:id" element={<VoteCampaignDetailPage />} />
+              <Route path="/vote-campaigns/:id/results" element={<VoteCampaignResultsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

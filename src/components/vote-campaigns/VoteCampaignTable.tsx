@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Trash2, Loader2 } from "lucide-react";
+import { Eye, Trash2, Loader2, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -120,6 +120,14 @@ export function VoteCampaignTable({ items, isLoading, isError }: Props) {
                         title="Ver detalhes"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/vote-campaigns/${item.id}/results`)}
+                        title="Ver resultados"
+                      >
+                        <BarChart3 className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
