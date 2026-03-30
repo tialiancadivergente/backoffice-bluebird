@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { fetchCampaignResults, fetchVoteCampaigns } from "@/api/vote-campaigns";
+import { fetchCampaignResults, fetchVoteCampaigns, type CampaignResult } from "@/api/vote-campaigns";
 
 export default function VoteCampaignResultsPage() {
   const { id } = useParams<{ id: string }>();
