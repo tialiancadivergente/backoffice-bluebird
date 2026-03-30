@@ -90,3 +90,8 @@ export async function createCandidate(campaignId: string, payload: CreateCandida
 export async function deleteCandidate(campaignId: string, candidateId: string): Promise<void> {
   await votingClient.delete(`/v1/voting/admin/campaigns/${campaignId}/candidates/${candidateId}`);
 }
+
+export async function fetchCampaignResults(campaignId: string): Promise<VoteCandidate[]> {
+  const { data } = await votingClient.get<VoteCandidate[]>(`/v1/voting/admin/campaigns/${campaignId}/results`);
+  return data;
+}

@@ -124,6 +124,14 @@ export function VoteCampaignTable({ items, isLoading, isError }: Props) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => navigate(`/vote-campaigns/${item.id}/results`)}
+                        title="Ver resultados"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setDeleteTarget(item)}
                         title="Excluir"
                         className="text-destructive hover:text-destructive"

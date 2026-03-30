@@ -27,6 +27,7 @@ const App = () => (
               <Route path="/lead-capture" element={<LeadCapturePage />} />
               <Route path="/vote-campaigns" element={<VoteCampaignsPage />} />
               <Route path="/vote-campaigns/:id" element={<VoteCampaignDetailPage />} />
+              <Route path="/vote-campaigns/:id/results" element={<VoteCampaignResultsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
