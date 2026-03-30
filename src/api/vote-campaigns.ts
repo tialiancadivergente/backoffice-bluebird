@@ -92,6 +92,12 @@ export async function deleteCandidate(campaignId: string, candidateId: string): 
 }
 
 export async function fetchCampaignResults(campaignId: string): Promise<VoteCandidate[]> {
-  const { data } = await votingClient.get<VoteCandidate[]>(`/v1/voting/admin/campaigns/${campaignId}/results`);
-  return data;
+  const { data } = await votingClient.get(`/v1/voting/admin/campaigns/${campaignId}/results`);
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === "object") {
+    const arr = data.items ?? data.candidates ?? data.results ?? data.data;
+    if (Array.isArray(arr)) return arr;
+  }
+  console.log("fetchCampaignResults response shape:", JSON.stringify(data, null, 2));
+  return [];
 }
