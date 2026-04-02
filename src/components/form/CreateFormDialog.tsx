@@ -55,7 +55,7 @@ export function CreateFormDialog({ open, onOpenChange }: Props) {
   const filteredSeasons = seasonItems.filter((s) => s.launch_id === selectedLaunchId);
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => createForm(values),
+    mutationFn: (values: FormValues) => createForm({ name: values.name, type: values.type, launch_id: values.launch_id, season_id: values.season_id }),
     onSuccess: () => {
       toast.success("Formulário criado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["forms"] });
