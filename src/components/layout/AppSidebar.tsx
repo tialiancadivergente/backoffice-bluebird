@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, LayoutDashboard, Target, Vote, Rocket } from "lucide-react";
+import { ChevronLeft, LayoutDashboard, Target, Vote, Rocket, CalendarDays } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoAlianca from "@/assets/logo-alianca.svg";
@@ -16,6 +16,7 @@ const menuItems: MenuItem[] = [
   { icon: Target, label: "Lead Capture", href: "/lead-capture" },
   { icon: Vote, label: "Vote Campaigns", href: "/vote-campaigns" },
   { icon: Rocket, label: "Launch", href: "/launch" },
+  { icon: CalendarDays, label: "Season", href: "/season" },
 ];
 
 const sidebarVariants = {
