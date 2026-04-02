@@ -43,7 +43,7 @@ export function CreateSeasonDialog({ open, onOpenChange }: Props) {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => createSeason(values),
+    mutationFn: (values: FormValues) => createSeason({ name: values.name, active: values.active, launch_id: values.launch_id }),
     onSuccess: () => {
       toast.success("Season criada com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["seasons"] });
