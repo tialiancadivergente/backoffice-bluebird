@@ -91,7 +91,7 @@ export default function FormDetailPage() {
 
         <TabsContent value="scores">
           {selectedVersion ? (
-            <ScoresTab versionId={selectedVersion.id} />
+            <ScoresTab versionId={selectedVersion.id} formId={id!} />
           ) : (
             <div className="text-center text-muted-foreground py-12">
               Selecione uma versão na aba "Versões" primeiro.
