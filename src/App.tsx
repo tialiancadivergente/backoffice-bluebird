@@ -13,6 +13,7 @@ import VoteCampaignResultsPage from "@/pages/VoteCampaignResultsPage";
 import LaunchPage from "@/pages/LaunchPage";
 import SeasonPage from "@/pages/SeasonPage";
 import FormPage from "@/pages/FormPage";
+import FormDetailPage from "@/pages/FormDetailPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/launch" element={<LaunchPage />} />
               <Route path="/season" element={<SeasonPage />} />
               <Route path="/forms" element={<FormPage />} />
+              <Route path="/forms/:id" element={<FormDetailPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

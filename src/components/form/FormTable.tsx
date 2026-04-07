@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -33,6 +34,7 @@ const columns = [
 ] as const;
 
 export function FormTable({ items, isLoading, isError }: Props) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<Form | null>(null);
   const [editTarget, setEditTarget] = useState<Form | null>(null);
@@ -104,6 +106,9 @@ export function FormTable({ items, isLoading, isError }: Props) {
                   <TableCell>{seasonMap.get(item.season_id) ?? item.season_id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => navigate(`/forms/${item.id}`)} title="Visualizar">
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => setEditTarget(item)} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
