@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, LayoutDashboard, Target, Vote, Rocket, CalendarDays, FileText } from "lucide-react";
+import { ChevronLeft, LayoutDashboard, Target, Vote, Rocket, CalendarDays, FileText, BarChart3, Settings2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoAlianca from "@/assets/logo-alianca.svg";
@@ -13,11 +13,14 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: BarChart3, label: "Dashboard Lançamentos", href: "/launch-dashboard" },
   { icon: Target, label: "Lead Capture", href: "/lead-capture" },
   { icon: Vote, label: "Vote Campaigns", href: "/vote-campaigns" },
   { icon: Rocket, label: "Launch", href: "/launch" },
   { icon: CalendarDays, label: "Season", href: "/season" },
   { icon: FileText, label: "Formulários", href: "/forms" },
+  { icon: Settings2, label: "Integrações Marketing", href: "/admin/integracoes/marketing-sync" },
+  { icon: Settings2, label: "Config. Syncs", href: "/admin/integracoes/marketing-sync/configuracoes" },
 ];
 
 const sidebarVariants = {
