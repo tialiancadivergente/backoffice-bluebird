@@ -83,6 +83,26 @@ export interface CreateManualJobsPayload {
   enqueue: true;
 }
 
+export interface AdPerformanceCsvExportFilters {
+  provider?: string;
+  accountId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  limit?: number;
+}
+
+export interface AdPerformanceCsvImportPayload {
+  file: File;
+  provider?: string;
+}
+
+export interface AdPerformanceCsvImportResult {
+  importedRows: number;
+  inserted: number;
+  updated: number;
+  affectedGroups: number;
+}
+
 export interface MarketingSyncConfiguration {
   id: string;
   syncKey: string;

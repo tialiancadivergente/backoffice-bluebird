@@ -1,6 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { ConnectionsSection } from "@/components/admin/marketing-sync/ConnectionsSection";
 import { AccountsSection } from "@/components/admin/marketing-sync/AccountsSection";
+import { CsvFallbackSection } from "@/components/admin/marketing-sync/CsvFallbackSection";
 import { JobsSection } from "@/components/admin/marketing-sync/JobsSection";
 import { DiagnosticsSection } from "@/components/admin/marketing-sync/DiagnosticsSection";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -35,6 +36,7 @@ export default function MarketingSyncAdminPage() {
           <TabsTrigger value="connections">Conexoes</TabsTrigger>
           <TabsTrigger value="accounts">Contas</TabsTrigger>
           <TabsTrigger value="jobs">Jobs</TabsTrigger>
+          <TabsTrigger value="csv-fallback">Fallback CSV</TabsTrigger>
           <TabsTrigger value="diagnostics">Diagnostico</TabsTrigger>
         </TabsList>
 
@@ -53,6 +55,10 @@ export default function MarketingSyncAdminPage() {
 
         <TabsContent value="jobs">
           <JobsSection connections={connections} />
+        </TabsContent>
+
+        <TabsContent value="csv-fallback">
+          <CsvFallbackSection connections={connections} />
         </TabsContent>
 
         <TabsContent value="diagnostics">

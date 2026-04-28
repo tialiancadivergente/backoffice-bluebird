@@ -2,6 +2,9 @@ import axios from "axios";
 import type {
   CreateDailyJobsPayload,
   CreateManualJobsPayload,
+  AdPerformanceCsvExportFilters,
+  AdPerformanceCsvImportPayload,
+  AdPerformanceCsvImportResult,
   MarketingSyncAccount,
   MarketingSyncConfiguration,
   MarketingSyncConfigurationPayload,
@@ -217,6 +220,30 @@ function sanitizeParams(params: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ""));
 }
 
+function firstNumber(record: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+function normalizeCsvImportResult(value: unknown): AdPerformanceCsvImportResult {
+  const record = asRecord(value);
+  return {
+    importedRows: firstNumber(record, ["importedRows", "imported_rows"]) ?? 0,
+    inserted: firstNumber(record, ["inserted"]) ?? 0,
+    updated: firstNumber(record, ["updated"]) ?? 0,
+    affectedGroups: firstNumber(record, ["affectedGroups", "affected_groups"]) ?? 0,
+  };
+}
+
 export async function getAuthorizeUrl(provider: string): Promise<string> {
   const { data } = await api.get(pathForProvider(provider, "/authorize"));
 
@@ -311,6 +338,38 @@ export async function getMarketingSyncPerformance(filters?: { provider?: string;
   });
 
   return readList(data).map(normalizePerformanceItem);
+}
+
+export async function exportAdPerformanceCsv(filters?: AdPerformanceCsvExportFilters) {
+  const response = await api.get("/marketing-sync/ad-performance/export/csv", {
+    params: sanitizeParams(filters ?? {}),
+    responseType: "blob",
+  });
+
+  const contentDisposition = response.headers["content-disposition"];
+  const filenameMatch =
+    typeof contentDisposition === "string" ? contentDisposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"']+)["']?/) : null;
+
+  return {
+    blob: response.data as Blob,
+    filename: filenameMatch?.[1] ? decodeURIComponent(filenameMatch[1]) : "marketing-ad-performance-export.csv",
+  };
+}
+
+export async function importAdPerformanceCsv(payload: AdPerformanceCsvImportPayload): Promise<AdPerformanceCsvImportResult> {
+  const formData = new FormData();
+  formData.append("file", payload.file);
+  if (payload.provider) {
+    formData.append("provider", payload.provider);
+  }
+
+  const { data } = await api.post("/marketing-sync/ad-performance/import/csv", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return normalizeCsvImportResult(data);
 }
 
 function normalizeConfiguration(value: unknown): MarketingSyncConfiguration {
