@@ -47,6 +47,7 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
   const [dailyDateFrom, setDailyDateFrom] = useState<string>("");
   const [dailyDateTo, setDailyDateTo] = useState<string>("");
   const [creationDebug, setCreationDebug] = useState<JobCreationDebugState | null>(null);
+  const [jobCreationMode, setJobCreationMode] = useState<"daily" | "manual">("daily");
 
   const jobsQuery = useMarketingSyncJobs({
     provider: providerFilter === "all" ? undefined : providerFilter,
@@ -71,7 +72,7 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
     mutationFn: async () => {
       const provider = dailyProvider === "all" ? undefined : dailyProvider;
       const connectionId = dailyConnectionId === "all" ? undefined : dailyConnectionId;
-      const isManual = Boolean(dailyDateFrom || dailyDateTo);
+      const isManual = jobCreationMode === "manual";
 
       if (isManual) {
         if (!provider) {
@@ -155,8 +156,7 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
       dateTo: toDateInput(today),
     };
   }, []);
-
-  const isManualMode = Boolean(dailyDateFrom || dailyDateTo);
+  const isManualMode = jobCreationMode === "manual";
 
   const enqueueMutation = useMutation({
     mutationFn: (jobId: string) => enqueueMarketingSyncJob(jobId),
@@ -189,6 +189,50 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
         </div>
 
         <div className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-5">
+          <div className="space-y-1.5 md:col-span-5">
+            <Label>Tipo de execucao</Label>
+            <div className="grid gap-2 md:grid-cols-2">
+              <button
+                type="button"
+                className={`rounded-lg border p-3 text-left transition-colors ${
+                  !isManualMode
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-foreground hover:border-primary/40"
+                }`}
+                onClick={() => {
+                  setJobCreationMode("daily");
+                  setDailyDateFrom("");
+                  setDailyDateTo("");
+                }}
+              >
+                <div className="text-sm font-medium">Fluxo diario</div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Dispara a extracao padrao do backend. Nao e um agendamento da UI; e uma execucao sob demanda para o fluxo
+                  automatico de `yesterday` e, quando aplicavel, `today`.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                className={`rounded-lg border p-3 text-left transition-colors ${
+                  isManualMode
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-foreground hover:border-primary/40"
+                }`}
+                onClick={() => {
+                  setJobCreationMode("manual");
+                  setDailyDateFrom((current) => current || dailyDefaults.dateFrom);
+                  setDailyDateTo((current) => current || dailyDefaults.dateTo);
+                }}
+              >
+                <div className="text-sm font-medium">Fluxo manual</div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Permite informar um intervalo customizado. Esse fluxo usa `POST /marketing-sync/jobs/manual`.
+                </p>
+              </button>
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label>Provider</Label>
             <Select value={dailyProvider} onValueChange={setDailyProvider}>
@@ -225,12 +269,22 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
 
           <div className="space-y-1.5">
             <Label>Data inicial</Label>
-            <Input type="date" value={dailyDateFrom} onChange={(event) => setDailyDateFrom(event.target.value)} />
+            <Input
+              type="date"
+              value={dailyDateFrom}
+              disabled={!isManualMode}
+              onChange={(event) => setDailyDateFrom(event.target.value)}
+            />
           </div>
 
           <div className="space-y-1.5">
             <Label>Data final</Label>
-            <Input type="date" value={dailyDateTo} onChange={(event) => setDailyDateTo(event.target.value)} />
+            <Input
+              type="date"
+              value={dailyDateTo}
+              disabled={!isManualMode}
+              onChange={(event) => setDailyDateTo(event.target.value)}
+            />
           </div>
 
           <div className="flex items-end">
@@ -246,32 +300,9 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
           <AlertDescription>
             {isManualMode
               ? "Com data inicial/final preenchidas, o backoffice chama POST /marketing-sync/jobs/manual. Se houver connectionId, ele e resolvido para a conta sincronizada selecionada antes do envio."
-              : "Sem intervalo customizado, o backoffice chama POST /marketing-sync/jobs/daily."}
+              : "Esse modo nao agenda nada na UI. Ele apenas dispara, sob demanda, o endpoint POST /marketing-sync/jobs/daily para o fluxo automatico padrao do backend."}
           </AlertDescription>
         </Alert>
-
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setDailyDateFrom("");
-              setDailyDateTo("");
-            }}
-          >
-            Usar fluxo diario
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setDailyDateFrom(dailyDefaults.dateFrom);
-              setDailyDateTo(dailyDefaults.dateTo);
-            }}
-          >
-            Preencher intervalo manual padrao
-          </Button>
-        </div>
 
         {creationDebug && (
           <Alert>
