@@ -1,5 +1,7 @@
 import axios from "axios";
 import type {
+  CreateDailyJobsPayload,
+  CreateManualJobsPayload,
   MarketingSyncAccount,
   MarketingSyncConfiguration,
   MarketingSyncConfigurationPayload,
@@ -271,8 +273,12 @@ export async function patchMarketingSyncAccountSelection(accountId: string, sele
   await api.patch(`/marketing-sync/accounts/${accountId}/selection`, { selected });
 }
 
-export async function createDailyJobs(payload?: { provider?: string; connectionId?: string; dateFrom?: string; dateTo?: string }) {
+export async function createDailyJobs(payload?: CreateDailyJobsPayload) {
   await api.post("/marketing-sync/jobs/daily", payload ?? {});
+}
+
+export async function createManualJobs(payload: CreateManualJobsPayload) {
+  await api.post("/marketing-sync/jobs/manual", payload);
 }
 
 export async function getMarketingSyncJobs(filters?: { provider?: string; connectionId?: string; status?: string }) {

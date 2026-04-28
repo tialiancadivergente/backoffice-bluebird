@@ -71,6 +71,18 @@ export interface MarketingSyncPerformanceItem {
   metrics: Record<string, unknown>;
 }
 
+export interface CreateDailyJobsPayload {
+  provider?: string;
+}
+
+export interface CreateManualJobsPayload {
+  provider: string;
+  accountId?: string;
+  dateFrom: string;
+  dateTo: string;
+  enqueue: true;
+}
+
 export interface MarketingSyncConfiguration {
   id: string;
   syncKey: string;

@@ -3,12 +3,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Play, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
+  createManualJobs,
   createDailyJobs,
   enqueueMarketingSyncJob,
+  getMarketingSyncAccounts,
+  getMarketingSyncJobs,
   processMarketingSyncJob,
 } from "@/api/syncs/marketing-sync";
 import { useMarketingSyncJobs, useMarketingSyncAccounts } from "@/hooks/use-marketing-sync";
-import type { OAuthConnection } from "@/types/syncs/marketing-sync";
+import type { CreateDailyJobsPayload, CreateManualJobsPayload, OAuthConnection } from "@/types/syncs/marketing-sync";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +31,11 @@ function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+type JobCreationDebugState = {
+  endpoint: string;
+  payload: CreateDailyJobsPayload | CreateManualJobsPayload;
+};
+
 export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
   const queryClient = useQueryClient();
   const [providerFilter, setProviderFilter] = useState<string>("all");
@@ -36,8 +44,9 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
 
   const [dailyProvider, setDailyProvider] = useState<string>("all");
   const [dailyConnectionId, setDailyConnectionId] = useState<string>("all");
-  const [dailyDateFrom, setDailyDateFrom] = useState<string>(toDateInput(new Date(Date.now() - 24 * 60 * 60 * 1000)));
-  const [dailyDateTo, setDailyDateTo] = useState<string>(toDateInput(new Date()));
+  const [dailyDateFrom, setDailyDateFrom] = useState<string>("");
+  const [dailyDateTo, setDailyDateTo] = useState<string>("");
+  const [creationDebug, setCreationDebug] = useState<JobCreationDebugState | null>(null);
 
   const jobsQuery = useMarketingSyncJobs({
     provider: providerFilter === "all" ? undefined : providerFilter,
@@ -58,22 +67,96 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
     return map;
   }, [accountsQuery.data]);
 
-  const createDailyJobsMutation = useMutation({
-    mutationFn: () =>
-      createDailyJobs({
-        provider: dailyProvider === "all" ? undefined : dailyProvider,
-        connectionId: dailyConnectionId === "all" ? undefined : dailyConnectionId,
-        dateFrom: dailyDateFrom || undefined,
-        dateTo: dailyDateTo || undefined,
-      }),
-    onSuccess: () => {
-      toast.success("Criacao de jobs diarios solicitada.");
+  const createJobsMutation = useMutation({
+    mutationFn: async () => {
+      const provider = dailyProvider === "all" ? undefined : dailyProvider;
+      const connectionId = dailyConnectionId === "all" ? undefined : dailyConnectionId;
+      const isManual = Boolean(dailyDateFrom || dailyDateTo);
+
+      if (isManual) {
+        if (!provider) {
+          throw new Error("Selecione um provider para criar jobs manuais.");
+        }
+
+        if (!dailyDateFrom || !dailyDateTo) {
+          throw new Error("Informe data inicial e data final para a extracao manual.");
+        }
+
+        const payload: CreateManualJobsPayload = {
+          provider,
+          dateFrom: dailyDateFrom,
+          dateTo: dailyDateTo,
+          enqueue: true,
+        };
+
+        if (connectionId) {
+          const accounts = await getMarketingSyncAccounts({ provider, connectionId });
+          const selectedAccount = accounts.find((account) => account.selected);
+
+          if (!selectedAccount) {
+            throw new Error("Nao foi encontrada conta sincronizada selecionada para a conexao informada.");
+          }
+
+          payload.accountId = selectedAccount.id;
+        }
+
+        await createManualJobs(payload);
+
+        return {
+          endpoint: "/marketing-sync/jobs/manual",
+          payload,
+          provider,
+          successMessage: "Criacao de job manual solicitada.",
+        };
+      }
+
+      const payload: CreateDailyJobsPayload = {
+        provider,
+      };
+
+      await createDailyJobs(payload);
+
+      return {
+        endpoint: "/marketing-sync/jobs/daily",
+        payload,
+        provider,
+        successMessage: "Criacao de jobs diarios solicitada.",
+      };
+    },
+    onSuccess: async (result) => {
+      setCreationDebug({
+        endpoint: result.endpoint,
+        payload: result.payload,
+      });
+      toast.success(result.successMessage);
+
+      if (result.endpoint === "/marketing-sync/jobs/manual" && result.provider) {
+        await queryClient.fetchQuery({
+          queryKey: ["marketing-sync", "jobs", { provider: result.provider }],
+          queryFn: () => getMarketingSyncJobs({ provider: result.provider }),
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ["marketing-sync", "jobs"] });
+      if (result.provider && providerFilter === "all") {
+        setProviderFilter(result.provider);
+      }
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Falha ao criar jobs diarios.");
+      toast.error(error instanceof Error ? error.message : "Falha ao criar jobs.");
     },
   });
+
+  const dailyDefaults = useMemo(() => {
+    const today = new Date();
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    return {
+      dateFrom: toDateInput(yesterday),
+      dateTo: toDateInput(today),
+    };
+  }, []);
+
+  const isManualMode = Boolean(dailyDateFrom || dailyDateTo);
 
   const enqueueMutation = useMutation({
     mutationFn: (jobId: string) => enqueueMarketingSyncJob(jobId),
@@ -151,12 +234,58 @@ export function JobsSection({ connections }: Readonly<JobsSectionProps>) {
           </div>
 
           <div className="flex items-end">
-            <Button type="button" onClick={() => createDailyJobsMutation.mutate()} disabled={createDailyJobsMutation.isPending}>
-              {createDailyJobsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
-              Criar jobs diarios
+            <Button type="button" onClick={() => createJobsMutation.mutate()} disabled={createJobsMutation.isPending}>
+              {createJobsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+              {isManualMode ? "Criar job manual" : "Criar jobs diarios"}
             </Button>
           </div>
         </div>
+
+        <Alert>
+          <AlertTitle>{isManualMode ? "Fluxo manual ativo" : "Fluxo diario ativo"}</AlertTitle>
+          <AlertDescription>
+            {isManualMode
+              ? "Com data inicial/final preenchidas, o backoffice chama POST /marketing-sync/jobs/manual. Se houver connectionId, ele e resolvido para a conta sincronizada selecionada antes do envio."
+              : "Sem intervalo customizado, o backoffice chama POST /marketing-sync/jobs/daily."}
+          </AlertDescription>
+        </Alert>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setDailyDateFrom("");
+              setDailyDateTo("");
+            }}
+          >
+            Usar fluxo diario
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setDailyDateFrom(dailyDefaults.dateFrom);
+              setDailyDateTo(dailyDefaults.dateTo);
+            }}
+          >
+            Preencher intervalo manual padrao
+          </Button>
+        </div>
+
+        {creationDebug && (
+          <Alert>
+            <AlertTitle>Debug da ultima criacao</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>
+                Endpoint chamado: <span className="font-mono">{creationDebug.endpoint}</span>
+              </p>
+              <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
+                {JSON.stringify(creationDebug.payload, null, 2)}
+              </pre>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-3 md:grid-cols-4">
           <div className="space-y-1.5">
