@@ -16,16 +16,11 @@ import type {
   OAuthConnectionAccount,
 } from "@/types/syncs/marketing-sync";
 
-const envBaseUrl =
-  import.meta.env.VITE_MARKETING_SYNC_API_BASE_URL ||
-  import.meta.env.VITE_MARKETING_DASHBOARD_API_BASE_URL ||
-  import.meta.env.VITE_API_URL ||
-  "/api";
-
 const api = axios.create({
-  baseURL: envBaseUrl.replace(/\/+$/, ""),
+  baseURL: "https://leads-api.aliancadivergente.com.br",
   headers: {
     "Content-Type": "application/json",
+    "x-api-key": "lsk_prod_v1_W7mQ9nX2fK8rT4yP6cV3uJ1hD5sL0aB8eR2qN7tY4zM9pC6xG1kF5vH3jS8dU2",
   },
 });
 
@@ -216,7 +211,7 @@ function normalizePerformanceItem(value: unknown): MarketingSyncPerformanceItem 
   };
 }
 
-function sanitizeParams(params: Record<string, unknown>) {
+function sanitizeParams(params: object) {
   return Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ""));
 }
 
