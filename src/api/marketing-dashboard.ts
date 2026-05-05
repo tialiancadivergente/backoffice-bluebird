@@ -10,18 +10,20 @@ import type {
   MarketingDashboardTimeseriesResponse,
 } from "@/types/marketing-dashboard";
 
-const envBaseUrl = import.meta.env.VITE_MARKETING_DASHBOARD_API_BASE_URL || import.meta.env.VITE_API_URL || "/api";
-const normalizedBaseUrl = envBaseUrl.replace(/\/+$/, "");
+const API_BASE_URL = "https://leads-api.aliancadivergente.com.br";
+
+const normalizedBaseUrl = API_BASE_URL.replace(/\/+$/, "");
 const hasMarketingDashboardPrefix = /\/marketing-dashboard$/i.test(normalizedBaseUrl);
 
 const marketingDashboardClient = axios.create({
   baseURL: normalizedBaseUrl,
   headers: {
     "Content-Type": "application/json",
+    "x-api-key": "lsk_prod_v1_W7mQ9nX2fK8rT4yP6cV3uJ1hD5sL0aB8eR2qN7tY4zM9pC6xG1kF5vH3jS8dU2",
   },
 });
 
-function buildDashboardPath(resource: "summary" | "timeseries" | "table") {
+function buildDashboardPath(resource: "summary" | "timeseries" | "table" | "filters") {
   if (hasMarketingDashboardPrefix) {
     return `/${resource}`;
   }
