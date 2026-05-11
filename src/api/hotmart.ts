@@ -44,7 +44,7 @@ export async function syncHistory(params: {
 }): Promise<{ status: string; message: string }> {
   const { data } = await hotmartClient.post<{ status: string; message: string }>(
     "/hotmart/sync-history",
-    null,
+    {},
     { params: sanitizeParams(params as Record<string, unknown>) },
   );
   return data;
@@ -56,7 +56,7 @@ export async function processBatch(
   const params = limit === undefined ? {} : { limit };
   const { data } = await hotmartClient.post<{ processed: number; failed: number }>(
     "/hotmart/process-batch",
-    null,
+    {},
     { params },
   );
   return data;
