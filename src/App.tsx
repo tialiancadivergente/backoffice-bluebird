@@ -17,6 +17,8 @@ import FormPage from "@/pages/FormPage";
 import FormDetailPage from "@/pages/FormDetailPage";
 import MarketingSyncAdminPage from "@/pages/admin/MarketingSyncAdminPage";
 import MarketingSyncConfigurationsPage from "@/pages/admin/MarketingSyncConfigurationsPage";
+import HotmartDashboardPage from "@/pages/HotmartDashboardPage";
+import HotmartTransacoesPage from "@/pages/HotmartTransacoesPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/forms/:id" element={<FormDetailPage />} />
               <Route path="/admin/integracoes/marketing-sync" element={<MarketingSyncAdminPage />} />
               <Route path="/admin/integracoes/marketing-sync/configuracoes" element={<MarketingSyncConfigurationsPage />} />
+              <Route path="/vendas-hotmart" element={<HotmartDashboardPage />} />
+              <Route path="/vendas-hotmart/transacoes" element={<HotmartTransacoesPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
