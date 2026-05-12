@@ -12,19 +12,17 @@ import type {
   CreateFullFormPayload, CreateFullFormResponse,
   UUID,
 } from "@/types/form-builder";
+import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
 
 const client = axios.create({
-  baseURL: "https://leads-api.aliancadivergente.com.br",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": "lsk_prod_v1_W7mQ9nX2fK8rT4yP6cV3uJ1hD5sL0aB8eR2qN7tY4zM9pC6xG1kF5vH3jS8dU2",
-  },
+  baseURL: LEADS_API_BASE_URL,
+  headers: LEADS_API_HEADERS,
 });
 
 // ── Forms ──
 export const listForms = async (params?: ListFormQuery) => {
-  const { data } = await client.get<ListFormItem[]>("/form", { params });
-  return Array.isArray(data) ? data : (data as any)?.items ?? [];
+  const { data } = await client.get<ListFormItem[] | { items?: ListFormItem[] }>("/form", { params });
+  return Array.isArray(data) ? data : data.items ?? [];
 };
 export const getForm = async (id: UUID) => (await client.get<FormResponse>(`/form/${id}`)).data;
 export const createForm = async (body: CreateFormDto) => (await client.post<FormResponse>("/form", body)).data;

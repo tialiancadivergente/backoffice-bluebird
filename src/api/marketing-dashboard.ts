@@ -9,18 +9,14 @@ import type {
   MarketingDashboardTableResponse,
   MarketingDashboardTimeseriesResponse,
 } from "@/types/marketing-dashboard";
+import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
 
-const API_BASE_URL = "https://leads-api.aliancadivergente.com.br";
-
-const normalizedBaseUrl = API_BASE_URL.replace(/\/+$/, "");
+const normalizedBaseUrl = LEADS_API_BASE_URL.replace(/\/+$/, "");
 const hasMarketingDashboardPrefix = /\/marketing-dashboard$/i.test(normalizedBaseUrl);
 
 const marketingDashboardClient = axios.create({
   baseURL: normalizedBaseUrl,
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": "lsk_prod_v1_W7mQ9nX2fK8rT4yP6cV3uJ1hD5sL0aB8eR2qN7tY4zM9pC6xG1kF5vH3jS8dU2",
-  },
+  headers: LEADS_API_HEADERS,
 });
 
 function buildDashboardPath(resource: "summary" | "timeseries" | "table" | "filters") {

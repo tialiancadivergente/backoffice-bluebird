@@ -1,18 +1,16 @@
 import axios from "axios";
 import type { Season, CreateSeasonPayload, UpdateSeasonPayload } from "@/types/season";
+import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
 
 const seasonClient = axios.create({
-  baseURL: "https://leads-api.aliancadivergente.com.br",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": "lsk_prod_v1_W7mQ9nX2fK8rT4yP6cV3uJ1hD5sL0aB8eR2qN7tY4zM9pC6xG1kF5vH3jS8dU2",
-  },
+  baseURL: LEADS_API_BASE_URL,
+  headers: LEADS_API_HEADERS,
 });
 
 export async function fetchSeasons(launchId?: string): Promise<Season[]> {
   const params = launchId ? { launch_id: launchId } : {};
-  const { data } = await seasonClient.get<Season[]>("/season", { params });
-  return Array.isArray(data) ? data : (data as any)?.items ?? [];
+  const { data } = await seasonClient.get<Season[] | { items?: Season[] }>("/season", { params });
+  return Array.isArray(data) ? data : data.items ?? [];
 }
 
 export async function fetchSeason(id: string): Promise<Season> {
