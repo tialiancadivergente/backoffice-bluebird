@@ -164,6 +164,17 @@ export async function getMetaExecutions(params?: {
   return data;
 }
 
+export async function importMetaCsv(file: File): Promise<{ imported: number; skipped: number }> {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await api.post<{ imported: number; skipped: number }>(
+    "/meta-ads/data/import/csv",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return data;
+}
+
 export function getMetaCsvExportUrl(filters?: MetaPerformanceFilters & { limit?: number }) {
   const params = new URLSearchParams();
   if (filters?.accountId) params.set("accountId", filters.accountId);

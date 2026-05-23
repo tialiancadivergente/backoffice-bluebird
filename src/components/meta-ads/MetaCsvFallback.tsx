@@ -1,6 +1,8 @@
-import { Download } from "lucide-react";
+import { useRef, useState } from "react";
+import { Download, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { getMetaCsvExportUrl } from "@/api/meta-ads";
+import { getMetaCsvExportUrl, importMetaCsv } from "@/api/meta-ads";
 import type { MetaPerformanceFilters } from "@/types/meta-ads";
 
 type Props = {
@@ -26,23 +28,57 @@ function downloadTemplate() {
 
 export function MetaCsvFallback({ filters }: Props) {
   const exportUrl = getMetaCsvExportUrl(filters);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    setImporting(true);
+    try {
+      const result = await importMetaCsv(file);
+      toast.success(`Importação concluída: ${result.imported} linhas importadas${result.skipped > 0 ? `, ${result.skipped} ignoradas` : ""}.`);
+    } catch {
+      toast.error("Erro ao importar CSV. Verifique o formato do arquivo.");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   return (
     <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
       <div>
         <p className="text-sm font-medium">Fallback CSV</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Exporte os dados processados ou baixe o modelo para importação manual.
+          Importe dados manualmente, exporte os dados processados ou baixe o modelo.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importing}
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          {importing ? "Importando..." : "Importar CSV"}
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={handleImport}
+        />
+        <Button
+          variant="outline"
+          size="sm"
           onClick={downloadTemplate}
         >
           <Download className="mr-2 h-4 w-4" />
-          Baixar Modelo CSV
+          Baixar Modelo
         </Button>
         <Button
           variant="outline"
