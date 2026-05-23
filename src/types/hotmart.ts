@@ -81,3 +81,27 @@ export interface UpdateHotmartProductPayload {
   product_id?: number;
   active?: boolean;
 }
+
+export interface HotmartSyncSchedule {
+  id: string;
+  name?: string;
+  period_preset: 'last_7d' | 'last_30d' | 'last_90d' | 'custom';
+  date_from?: string;
+  date_to?: string;
+  transaction_status?: string;
+  scheduled_time: string;
+  active: boolean;
+  last_run_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateHotmartSyncSchedulePayload {
+  name?: string;
+  period_preset: 'last_7d' | 'last_30d' | 'last_90d' | 'custom';
+  date_from?: string;
+  date_to?: string;
+  transaction_status?: string;
+  scheduled_time: string;
+  active?: boolean;
+}

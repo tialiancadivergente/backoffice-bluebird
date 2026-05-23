@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHotmartProducts, getSales, getSalesSummary } from "@/api/hotmart";
+import { getHotmartProducts, getSales, getSalesSummary, getSyncSchedules } from "@/api/hotmart";
 import type { HotmartSalesFilters, HotmartSummaryFilters } from "@/types/hotmart";
 
 export function useHotmartSales(filters: HotmartSalesFilters, enabled = true) {
@@ -23,5 +23,12 @@ export function useHotmartProducts() {
   return useQuery({
     queryKey: ['hotmart-products'],
     queryFn: getHotmartProducts,
+  });
+}
+
+export function useHotmartSyncSchedules() {
+  return useQuery({
+    queryKey: ['hotmart-sync-schedules'],
+    queryFn: getSyncSchedules,
   });
 }

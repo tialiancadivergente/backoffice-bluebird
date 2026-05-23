@@ -7,6 +7,7 @@ import { HotmartSalesTable } from "@/components/hotmart/HotmartSalesTable";
 import { HotmartSalesPagination } from "@/components/hotmart/HotmartSalesPagination";
 import { HotmartProductConfig } from "@/components/hotmart/HotmartProductConfig";
 import { HotmartSyncSection } from "@/components/admin/hotmart/HotmartSyncSection";
+import { HotmartSyncSchedules } from "@/components/hotmart/HotmartSyncSchedules";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -168,8 +169,9 @@ export default function HotmartDashboardPage() {
         </TabsContent>
 
         {/* ── Sincronização ───────────────────────────────────────── */}
-        <TabsContent value="sincronizacao" className="mt-4">
+        <TabsContent value="sincronizacao" className="space-y-6 mt-4">
           <HotmartSyncSection />
+          <HotmartSyncSchedules />
         </TabsContent>
       </Tabs>
     </div>
