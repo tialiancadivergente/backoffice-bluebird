@@ -40,6 +40,7 @@ interface ConnectionsSectionProps {
   isLoading: boolean;
   isError: boolean;
   onRefetch: () => void;
+  provider?: "google_ads" | "meta_ads";
 }
 
 export function ConnectionsSection({
@@ -47,6 +48,7 @@ export function ConnectionsSection({
   isLoading,
   isError,
   onRefetch,
+  provider,
 }: Readonly<ConnectionsSectionProps>) {
   const queryClient = useQueryClient();
   const [activeConnection, setActiveConnection] = useState<OAuthConnection | null>(null);
@@ -105,24 +107,28 @@ export function ConnectionsSection({
           <p className="text-sm text-muted-foreground">Gerencie conexoes Google Ads e Meta Ads.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => connectMutation.mutate("google_ads")}
-            disabled={connectMutation.isPending}
-          >
-            {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
-            Conectar Google Ads
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => connectMutation.mutate("meta_ads")}
-            disabled={connectMutation.isPending}
-          >
-            {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
-            Conectar Meta Ads
-          </Button>
+          {(!provider || provider === "google_ads") && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => connectMutation.mutate("google_ads")}
+              disabled={connectMutation.isPending}
+            >
+              {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+              Conectar Google Ads
+            </Button>
+          )}
+          {(!provider || provider === "meta_ads") && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => connectMutation.mutate("meta_ads")}
+              disabled={connectMutation.isPending}
+            >
+              {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+              Conectar Meta Ads
+            </Button>
+          )}
           <Button type="button" variant="outline" onClick={onRefetch}>
             Atualizar
           </Button>

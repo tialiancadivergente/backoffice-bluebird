@@ -216,6 +216,7 @@ export default function MetaAdsDashboardPage() {
               isLoading={connectionsQuery.isLoading}
               isError={connectionsQuery.isError}
               onRefetch={() => connectionsQuery.refetch()}
+              provider="meta_ads"
             />
           </div>
           <div>
