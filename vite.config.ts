@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         "/leads-api": {
-          target: "https://leads-api.aliancadivergente.com.br",
+          target: env.LEADS_API_TARGET ?? "https://leads-api.aliancadivergente.com.br",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/leads-api/, ""),
           headers: env.LEADS_API_KEY ? { "x-api-key": env.LEADS_API_KEY } : undefined,
