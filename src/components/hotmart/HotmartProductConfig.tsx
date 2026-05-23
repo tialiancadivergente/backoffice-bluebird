@@ -1,7 +1,5 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +13,7 @@ import { useLaunchOptions } from "@/hooks/use-launch-dashboard";
 import type { HotmartProduct } from "@/types/hotmart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,9 +27,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
-} from "@/components/ui/form";
 import {
   Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -64,89 +60,80 @@ function ProductForm({
   const launchesQuery = useLaunchOptions();
   const launches = launchesQuery.data ?? [];
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues,
-  });
+  const [name, setName] = useState(defaultValues.name);
+  const [productId, setProductId] = useState(defaultValues.product_id);
+  const [launchId, setLaunchId] = useState<string | undefined>(defaultValues.launch_id);
+  const [active, setActive] = useState(defaultValues.active);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const result = formSchema.safeParse({ name, product_id: productId, launch_id: launchId, active });
+    if (!result.success) {
+      const flat = result.error.flatten().fieldErrors;
+      setErrors({ name: flat.name?.[0], product_id: flat.product_id?.[0] });
+      return;
+    }
+    setErrors({});
+    onSubmit(result.data);
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do produto</FormLabel>
-              <FormControl>
-                <Input placeholder="ex: PONTO CEGO - Evento Online" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label>Nome do produto</Label>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="ex: PONTO CEGO - Evento Online"
         />
-        <FormField
-          control={form.control}
-          name="product_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ID do produto Hotmart</FormLabel>
-              <FormControl>
-                <Input placeholder="ex: 12345678" inputMode="numeric" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        {errors.name && <p className="text-sm font-medium text-destructive">{errors.name}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label>ID do produto Hotmart</Label>
+        <Input
+          value={productId}
+          onChange={(e) => setProductId(e.target.value)}
+          placeholder="ex: 12345678"
+          inputMode="numeric"
         />
-        <FormField
-          control={form.control}
-          name="launch_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Launch <span className="text-muted-foreground font-normal">(opcional)</span>
-              </FormLabel>
-              <UiSelect
-                value={field.value ?? "none"}
-                onValueChange={(v) => field.onChange(v === "none" ? undefined : v)}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Nenhum" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {launches.map((l) => (
-                    <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </UiSelect>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="active"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
-              <FormLabel className="mb-0">Ativo</FormLabel>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isPending}>
-            {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {submitLabel}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
+        {errors.product_id && <p className="text-sm font-medium text-destructive">{errors.product_id}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label>
+          Launch <span className="text-muted-foreground font-normal">(opcional)</span>
+        </Label>
+        <UiSelect
+          value={launchId ?? "none"}
+          onValueChange={(v) => setLaunchId(v === "none" ? undefined : v)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Nenhum" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Nenhum</SelectItem>
+            {launches.map((l) => (
+              <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </UiSelect>
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+        <Label>Ativo</Label>
+        <Switch checked={active} onCheckedChange={setActive} />
+      </div>
+
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {submitLabel}
+        </Button>
+      </DialogFooter>
+    </form>
   );
 }
 
@@ -162,7 +149,7 @@ export function HotmartProductConfig() {
     mutationFn: createHotmartProduct,
     onSuccess: () => {
       toast.success("Produto criado com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["hotmart-products"] });
+      queryClient.refetchQueries({ queryKey: ["hotmart-products"] });
       setCreateOpen(false);
     },
     onError: () => toast.error("Erro ao criar produto."),
@@ -171,9 +158,11 @@ export function HotmartProductConfig() {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateHotmartProduct>[1] }) =>
       updateHotmartProduct(id, payload),
-    onSuccess: () => {
+    onSuccess: (updated) => {
       toast.success("Produto atualizado com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["hotmart-products"] });
+      queryClient.setQueryData<HotmartProduct[]>(["hotmart-products"], (old) =>
+        old ? old.map((p) => (p.id === updated.id ? updated : p)) : old,
+      );
       setEditTarget(null);
     },
     onError: () => toast.error("Erro ao atualizar produto."),
@@ -183,7 +172,7 @@ export function HotmartProductConfig() {
     mutationFn: deleteHotmartProduct,
     onSuccess: () => {
       toast.success("Produto removido.");
-      queryClient.invalidateQueries({ queryKey: ["hotmart-products"] });
+      queryClient.refetchQueries({ queryKey: ["hotmart-products"] });
       setDeleteTarget(null);
     },
     onError: () => toast.error("Erro ao remover produto."),
@@ -298,6 +287,7 @@ export function HotmartProductConfig() {
           </DialogHeader>
           {editTarget && (
             <ProductForm
+              key={editTarget.id}
               defaultValues={{
                 name: editTarget.name,
                 product_id: String(editTarget.product_id),

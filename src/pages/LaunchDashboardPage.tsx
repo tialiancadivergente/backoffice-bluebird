@@ -34,7 +34,11 @@ import {
 import type { LaunchDashboardFilters } from "@/types/launch-dashboard";
 
 function toParam(date: Date) {
-  return date.toISOString().slice(0, 10);
+  return format(date, "yyyy-MM-dd");
+}
+
+function fromParam(date: string) {
+  return new Date(`${date}T12:00:00`);
 }
 
 function defaultFilters(): LaunchDashboardFilters {
@@ -107,14 +111,14 @@ export default function LaunchDashboardPage() {
                 <Button variant="outline" className="w-full justify-start font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {filters.dateFrom
-                    ? format(new Date(filters.dateFrom), "dd/MM/yyyy", { locale: ptBR })
+                    ? format(fromParam(filters.dateFrom), "dd/MM/yyyy", { locale: ptBR })
                     : "Selecionar"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
+                  selected={filters.dateFrom ? fromParam(filters.dateFrom) : undefined}
                   onSelect={(d) => d && setFilter("dateFrom", toParam(d))}
                   locale={ptBR}
                 />
@@ -130,14 +134,14 @@ export default function LaunchDashboardPage() {
                 <Button variant="outline" className="w-full justify-start font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {filters.dateTo
-                    ? format(new Date(filters.dateTo), "dd/MM/yyyy", { locale: ptBR })
+                    ? format(fromParam(filters.dateTo), "dd/MM/yyyy", { locale: ptBR })
                     : "Selecionar"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={filters.dateTo ? new Date(filters.dateTo) : undefined}
+                  selected={filters.dateTo ? fromParam(filters.dateTo) : undefined}
                   onSelect={(d) => d && setFilter("dateTo", toParam(d))}
                   locale={ptBR}
                 />
