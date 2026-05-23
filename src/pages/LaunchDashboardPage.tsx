@@ -1,200 +1,245 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { CalendarIcon, ChevronDown } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MarketingDashboardFilters } from "@/components/marketing-dashboard/MarketingDashboardFilters";
-import { MarketingDashboardSummaryCards } from "@/components/marketing-dashboard/MarketingDashboardSummaryCards";
-import { MarketingDashboardTimeseriesChart } from "@/components/marketing-dashboard/MarketingDashboardTimeseriesChart";
-import { MarketingDashboardTable } from "@/components/marketing-dashboard/MarketingDashboardTable";
-import { MarketingDashboardTablePagination } from "@/components/marketing-dashboard/MarketingDashboardTablePagination";
+import { Calendar } from "@/components/ui/calendar";
 import {
-  useMarketingDashboardFilterOptions,
-  useMarketingDashboardSummary,
-  useMarketingDashboardTable,
-  useMarketingDashboardTimeseries,
-} from "@/hooks/use-marketing-dashboard";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import type {
-  MarketingDashboardFilterOptions,
-  MarketingDashboardFilters as MarketingDashboardFiltersType,
-  MarketingDashboardSortOrder,
-  MarketingDashboardTableParams,
-} from "@/types/marketing-dashboard";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LaunchFunnelTable } from "@/components/launch-dashboard/LaunchFunnelTable";
+import { LaunchKpiCards } from "@/components/launch-dashboard/LaunchKpiCards";
+import { LaunchTimeseriesChart } from "@/components/launch-dashboard/LaunchTimeseriesChart";
+import {
+  useLaunchFunnelTable,
+  useLaunchOptions,
+  useLaunchSummary,
+  useLaunchTimeseries,
+} from "@/hooks/use-launch-dashboard";
+import type { LaunchDashboardFilters } from "@/types/launch-dashboard";
 
-function toDateParam(date: Date) {
+function toParam(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-function getDefaultDateFilters(): MarketingDashboardFiltersType {
+function defaultFilters(): LaunchDashboardFilters {
   const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-
-  return {
-    dateFrom: toDateParam(yesterday),
-    dateTo: toDateParam(today),
-  };
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+  return { dateFrom: toParam(thirtyDaysAgo), dateTo: toParam(today) };
 }
 
-const INITIAL_SORT: {
-  sortBy: MarketingDashboardTableParams["sortBy"];
-  sortOrder: MarketingDashboardSortOrder;
-} = {
-  sortBy: "spend",
-  sortOrder: "desc",
-};
-
 export default function LaunchDashboardPage() {
-  const [filters, setFilters] = useState<MarketingDashboardFiltersType>(() => getDefaultDateFilters());
+  const [filters, setFilters] = useState<LaunchDashboardFilters>(defaultFilters);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const [selectedMetric, setSelectedMetric] = useState("spend");
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
-  const [sortBy, setSortBy] = useState<MarketingDashboardTableParams["sortBy"]>(INITIAL_SORT.sortBy);
-  const [sortOrder, setSortOrder] = useState<MarketingDashboardSortOrder>(INITIAL_SORT.sortOrder);
+  const launchesQuery = useLaunchOptions();
+  const summaryQuery = useLaunchSummary(filters);
+  const timeseriesQuery = useLaunchTimeseries(filters);
+  const funnelQuery = useLaunchFunnelTable(filters);
 
-  const debouncedFilters = useDebouncedValue(filters, 450);
+  const launches = launchesQuery.data ?? [];
 
-  const filtersQuery = useMarketingDashboardFilterOptions(filters);
+  function setFilter<K extends keyof LaunchDashboardFilters>(
+    key: K,
+    value: LaunchDashboardFilters[K],
+  ) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
 
-  const summaryQuery = useMarketingDashboardSummary(debouncedFilters);
-  const timeseriesQuery = useMarketingDashboardTimeseries(debouncedFilters);
-
-  const tableParams = useMemo(
-    () => ({
-      ...debouncedFilters,
-      page,
-      perPage,
-      sortBy,
-      sortOrder,
-    }),
-    [debouncedFilters, page, perPage, sortBy, sortOrder],
-  );
-
-  const tableQuery = useMarketingDashboardTable(tableParams);
-
-  const filterOptions: MarketingDashboardFilterOptions = filtersQuery.data?.options ?? {
-    providers: [],
-    accounts: [],
-    campaigns: [],
-    adsets: [],
-    ads: [],
-    launches: [],
-    seasons: [],
-  };
-
-  const hasAnyData =
-    (summaryQuery.data?.summary.impressions ?? 0) > 0 ||
-    (timeseriesQuery.data?.timeseries.length ?? 0) > 0 ||
-    (tableQuery.data?.items.length ?? 0) > 0;
-
-  const handleClearFilters = () => {
-    const defaultDateFilters = getDefaultDateFilters();
-    setFilters(defaultDateFilters);
-    setPage(1);
-  };
-
-  const handleChangeFilters = (value: Partial<MarketingDashboardFiltersType>) => {
-    setFilters((previous) => ({ ...previous, ...value }));
-    setPage(1);
-  };
-
-  const handleSort = (nextSortBy: MarketingDashboardTableParams["sortBy"]) => {
-    if (!nextSortBy) return;
-
-    if (sortBy === nextSortBy) {
-      setSortOrder((previousOrder) => (previousOrder === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(nextSortBy);
-      setSortOrder("desc");
-    }
-
-    setPage(1);
-  };
+  function clearFilters() {
+    setFilters(defaultFilters());
+  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard de Lancamentos</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard de Lançamentos</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Monitoramento de performance de midia e cadastros por anuncio.
+          Funil completo: anúncio → lead → checkout → venda Hotmart.
         </p>
       </div>
 
-      <MarketingDashboardFilters
-        filters={filters}
-        options={filterOptions}
-        onChange={handleChangeFilters}
-        onClear={handleClearFilters}
-        isLoadingOptions={filtersQuery.isLoading || filtersQuery.isFetching}
-      />
+      {/* Filters */}
+      <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Launch selector */}
+          <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+            <Label className="text-xs">Lançamento</Label>
+            <Select
+              value={filters.launchId ?? "all"}
+              onValueChange={(v) => setFilter("launchId", v === "all" ? undefined : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todos os lançamentos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os lançamentos</SelectItem>
+                {launches.map((l) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    {l.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {!summaryQuery.isLoading && !timeseriesQuery.isLoading && !tableQuery.isLoading && !hasAnyData && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Nenhum dado encontrado</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>
-              Nao encontramos registros para o periodo e filtros selecionados. Isso pode acontecer quando a trilha
-              ad/day ainda esta em preenchimento ou quando os filtros estao restritivos.
-            </p>
-            <Button type="button" variant="outline" onClick={handleClearFilters}>
-              Limpar filtros
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+          {/* Date From */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">De</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {filters.dateFrom
+                    ? format(new Date(filters.dateFrom), "dd/MM/yyyy", { locale: ptBR })
+                    : "Selecionar"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
+                  onSelect={(d) => d && setFilter("dateFrom", toParam(d))}
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-      <section className="space-y-3" aria-label="Resumo de indicadores">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">Resumo</h2>
-          <p className="text-sm text-muted-foreground">Indicadores agregados retornados pelo backend.</p>
+          {/* Date To */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Até</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {filters.dateTo
+                    ? format(new Date(filters.dateTo), "dd/MM/yyyy", { locale: ptBR })
+                    : "Selecionar"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={filters.dateTo ? new Date(filters.dateTo) : undefined}
+                  onSelect={(d) => d && setFilter("dateTo", toParam(d))}
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-        <MarketingDashboardSummaryCards
+
+        {/* Advanced filters */}
+        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 px-2">
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
+              />
+              Filtros avançados
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Campanha ID</Label>
+                <input
+                  type="text"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  placeholder="external campaign id"
+                  value={filters.externalCampaignId ?? ""}
+                  onChange={(e) =>
+                    setFilter("externalCampaignId", e.target.value || undefined)
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Adset ID</Label>
+                <input
+                  type="text"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  placeholder="external adset id"
+                  value={filters.externalAdsetId ?? ""}
+                  onChange={(e) =>
+                    setFilter("externalAdsetId", e.target.value || undefined)
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Anúncio ID</Label>
+                <input
+                  type="text"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  placeholder="external ad id"
+                  value={filters.externalAdId ?? ""}
+                  onChange={(e) =>
+                    setFilter("externalAdId", e.target.value || undefined)
+                  }
+                />
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs h-7">
+            Limpar filtros
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <section aria-label="Indicadores do funil">
+        <h2 className="text-base font-semibold mb-3">Indicadores</h2>
+        <LaunchKpiCards
           data={summaryQuery.data?.summary}
           isLoading={summaryQuery.isLoading}
           isError={summaryQuery.isError}
-          onRetry={() => summaryQuery.refetch()}
         />
       </section>
 
-      <section className="space-y-3" aria-label="Evolucao das metricas">
-        <MarketingDashboardTimeseriesChart
+      {/* Timeseries */}
+      <section aria-label="Tendência diária">
+        <h2 className="text-base font-semibold mb-3">Tendência</h2>
+        <LaunchTimeseriesChart
           data={timeseriesQuery.data?.timeseries ?? []}
-          selectedMetric={selectedMetric}
-          onMetricChange={setSelectedMetric}
           isLoading={timeseriesQuery.isLoading}
-          isError={timeseriesQuery.isError}
-          onRetry={() => timeseriesQuery.refetch()}
         />
       </section>
 
-      <section className="space-y-3" aria-label="Tabela detalhada por anuncio">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">Detalhamento por anuncio</h2>
-          <p className="text-sm text-muted-foreground">Dados paginados e ordenados diretamente no backend.</p>
+      {/* Funnel Table */}
+      <section aria-label="Funil por anúncio">
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-base font-semibold">Funil por anúncio</h2>
+          {funnelQuery.data && (
+            <span className="text-xs text-muted-foreground">
+              {funnelQuery.data.total} anúncio{funnelQuery.data.total !== 1 ? "s" : ""}
+            </span>
+          )}
         </div>
-
-        <MarketingDashboardTable
-          items={tableQuery.data?.items ?? []}
-          isLoading={tableQuery.isLoading}
-          isError={tableQuery.isError}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-          onRetry={() => tableQuery.refetch()}
+        <LaunchFunnelTable
+          items={funnelQuery.data?.items ?? []}
+          isLoading={funnelQuery.isLoading}
+          isError={funnelQuery.isError}
+          onRetry={() => funnelQuery.refetch()}
         />
-
-        {tableQuery.data?.meta && tableQuery.data.meta.totalPages > 0 && (
-          <MarketingDashboardTablePagination
-            meta={tableQuery.data.meta}
-            onPageChange={setPage}
-            onPerPageChange={(nextPerPage) => {
-              setPerPage(nextPerPage);
-              setPage(1);
-            }}
-          />
-        )}
       </section>
     </div>
   );
