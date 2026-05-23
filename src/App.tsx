@@ -20,9 +20,6 @@ import MarketingSyncConfigurationsPage from "@/pages/admin/MarketingSyncConfigur
 import HotmartDashboardPage from "@/pages/HotmartDashboardPage";
 import HotmartTransacoesPage from "@/pages/HotmartTransacoesPage";
 import MetaAdsDashboardPage from "@/pages/MetaAdsDashboardPage";
-import MetaAdsJobsPage from "@/pages/MetaAdsJobsPage";
-import MetaAdsConexaoPage from "@/pages/MetaAdsConexaoPage";
-import MetaAdsConfigPage from "@/pages/MetaAdsConfigPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -51,9 +48,6 @@ const App = () => (
               <Route path="/vendas-hotmart" element={<HotmartDashboardPage />} />
               <Route path="/vendas-hotmart/transacoes" element={<HotmartTransacoesPage />} />
               <Route path="/meta-ads" element={<MetaAdsDashboardPage />} />
-              <Route path="/meta-ads/jobs" element={<MetaAdsJobsPage />} />
-              <Route path="/meta-ads/conexao" element={<MetaAdsConexaoPage />} />
-              <Route path="/meta-ads/configuracoes" element={<MetaAdsConfigPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
