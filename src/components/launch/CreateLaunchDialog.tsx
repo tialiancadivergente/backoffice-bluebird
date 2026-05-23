@@ -49,7 +49,10 @@ export function CreateLaunchDialog({ open, onOpenChange }: Props) {
   });
 
   const onSubmit = (values: FormValues) => {
-    mutation.mutate({ name: values.name, active: values.active });
+    mutation.mutate({
+      name: values.name,
+      active: values.active,
+    });
   };
 
   return (

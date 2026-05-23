@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSales, getSalesSummary } from "@/api/hotmart";
+import { getHotmartProducts, getSales, getSalesSummary } from "@/api/hotmart";
 import type { HotmartSalesFilters, HotmartSummaryFilters } from "@/types/hotmart";
 
 export function useHotmartSales(filters: HotmartSalesFilters, enabled = true) {
@@ -16,5 +16,12 @@ export function useHotmartSummary(filters: HotmartSummaryFilters) {
     queryKey: ["hotmart-summary", filters],
     queryFn: () => getSalesSummary(filters),
     placeholderData: (prev) => prev,
+  });
+}
+
+export function useHotmartProducts() {
+  return useQuery({
+    queryKey: ['hotmart-products'],
+    queryFn: getHotmartProducts,
   });
 }

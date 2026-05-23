@@ -1,9 +1,12 @@
 import axios from "axios";
 import type {
+  CreateHotmartProductPayload,
+  HotmartProduct,
   HotmartSale,
   HotmartSalesFilters,
   HotmartSummary,
   HotmartSummaryFilters,
+  UpdateHotmartProductPayload,
 } from "@/types/hotmart";
 import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
 
@@ -58,4 +61,23 @@ export async function processBatch(
     { params },
   );
   return data;
+}
+
+export async function getHotmartProducts(): Promise<HotmartProduct[]> {
+  const { data } = await hotmartClient.get<HotmartProduct[]>('/hotmart/products');
+  return data;
+}
+
+export async function createHotmartProduct(payload: CreateHotmartProductPayload): Promise<HotmartProduct> {
+  const { data } = await hotmartClient.post<HotmartProduct>('/hotmart/products', payload);
+  return data;
+}
+
+export async function updateHotmartProduct(id: string, payload: UpdateHotmartProductPayload): Promise<HotmartProduct> {
+  const { data } = await hotmartClient.patch<HotmartProduct>(`/hotmart/products/${id}`, payload);
+  return data;
+}
+
+export async function deleteHotmartProduct(id: string): Promise<void> {
+  await hotmartClient.delete(`/hotmart/products/${id}`);
 }

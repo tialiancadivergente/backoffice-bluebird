@@ -56,3 +56,28 @@ export interface HotmartSummaryFilters {
   to?: string;
   sourceAccount?: string;
 }
+
+export interface HotmartProduct {
+  id: string;
+  launch_id: string | null;
+  launch_name: string | null;
+  name: string;
+  product_id: number;
+  active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateHotmartProductPayload {
+  launch_id?: string | null;
+  name: string;
+  product_id: number;
+  active?: boolean;
+}
+
+export interface UpdateHotmartProductPayload {
+  launch_id?: string | null;
+  name?: string;
+  product_id?: number;
+  active?: boolean;
+}

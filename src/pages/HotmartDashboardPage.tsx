@@ -5,6 +5,8 @@ import { HotmartSummaryCards } from "@/components/hotmart/HotmartSummaryCards";
 import { HotmartSalesFilters } from "@/components/hotmart/HotmartSalesFilters";
 import { HotmartSalesTable } from "@/components/hotmart/HotmartSalesTable";
 import { HotmartSalesPagination } from "@/components/hotmart/HotmartSalesPagination";
+import { HotmartProductConfig } from "@/components/hotmart/HotmartProductConfig";
+import { HotmartSyncSection } from "@/components/admin/hotmart/HotmartSyncSection";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,8 +75,8 @@ export default function HotmartDashboardPage() {
         </p>
       </div>
 
-      {/* Shared filters — applied to both tabs */}
-      <HotmartSalesFilters
+      {/* Shared filters — applied to resumo and transacoes tabs only */}
+      {activeTab !== "configuracao" && <HotmartSalesFilters
         from={from}
         to={to}
         status={status}
@@ -84,12 +86,14 @@ export default function HotmartDashboardPage() {
         onStatusChange={handleStatusChange}
         onSourceAccountChange={handleSourceAccountChange}
         onClear={handleClear}
-      />
+      />}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="resumo">Resumo</TabsTrigger>
           <TabsTrigger value="transacoes">Transações</TabsTrigger>
+          <TabsTrigger value="configuracao">Configuração</TabsTrigger>
+          <TabsTrigger value="sincronizacao">Sincronização</TabsTrigger>
         </TabsList>
 
         {/* ── Resumo ──────────────────────────────────────────────── */}
@@ -156,6 +160,16 @@ export default function HotmartDashboardPage() {
             onPageChange={setPage}
             onLimitChange={(n) => { setLimit(n); setPage(1); }}
           />
+        </TabsContent>
+
+        {/* ── Configuração ────────────────────────────────────────── */}
+        <TabsContent value="configuracao" className="mt-4">
+          <HotmartProductConfig />
+        </TabsContent>
+
+        {/* ── Sincronização ───────────────────────────────────────── */}
+        <TabsContent value="sincronizacao" className="mt-4">
+          <HotmartSyncSection />
         </TabsContent>
       </Tabs>
     </div>

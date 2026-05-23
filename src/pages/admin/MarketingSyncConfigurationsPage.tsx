@@ -1,5 +1,4 @@
 import { ConfigurationsSection } from "@/components/admin/marketing-sync/ConfigurationsSection";
-import { HotmartSyncSection } from "@/components/admin/hotmart/HotmartSyncSection";
 
 export default function MarketingSyncConfigurationsPage() {
   return (
@@ -12,7 +11,6 @@ export default function MarketingSyncConfigurationsPage() {
         </p>
       </div>
       <ConfigurationsSection />
-      <HotmartSyncSection />
     </div>
   );
 }
