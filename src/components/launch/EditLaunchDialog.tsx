@@ -40,7 +40,10 @@ export function EditLaunchDialog({ launch, open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (launch) {
-      form.reset({ name: launch.name, active: launch.active });
+      form.reset({
+        name: launch.name,
+        active: launch.active,
+      });
     }
   }, [launch, form]);
 
@@ -57,7 +60,10 @@ export function EditLaunchDialog({ launch, open, onOpenChange }: Props) {
   });
 
   const onSubmit = (values: FormValues) => {
-    mutation.mutate(values);
+    mutation.mutate({
+      name: values.name,
+      active: values.active,
+    });
   };
 
   return (

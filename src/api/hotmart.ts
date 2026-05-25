@@ -1,9 +1,14 @@
 import axios from "axios";
 import type {
+  CreateHotmartProductPayload,
+  CreateHotmartSyncSchedulePayload,
+  HotmartProduct,
   HotmartSale,
   HotmartSalesFilters,
   HotmartSummary,
   HotmartSummaryFilters,
+  HotmartSyncSchedule,
+  UpdateHotmartProductPayload,
 } from "@/types/hotmart";
 import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
 
@@ -56,6 +61,49 @@ export async function processBatch(
     "/hotmart/process-batch",
     {},
     { params },
+  );
+  return data;
+}
+
+export async function getHotmartProducts(): Promise<HotmartProduct[]> {
+  const { data } = await hotmartClient.get<HotmartProduct[]>('/hotmart/products');
+  return data;
+}
+
+export async function createHotmartProduct(payload: CreateHotmartProductPayload): Promise<HotmartProduct> {
+  const { data } = await hotmartClient.post<HotmartProduct>('/hotmart/products', payload);
+  return data;
+}
+
+export async function updateHotmartProduct(id: string, payload: UpdateHotmartProductPayload): Promise<HotmartProduct> {
+  const { data } = await hotmartClient.patch<HotmartProduct>(`/hotmart/products/${id}`, payload);
+  return data;
+}
+
+export async function deleteHotmartProduct(id: string): Promise<void> {
+  await hotmartClient.delete(`/hotmart/products/${id}`);
+}
+
+export async function getSyncSchedules(): Promise<HotmartSyncSchedule[]> {
+  const { data } = await hotmartClient.get<HotmartSyncSchedule[]>('/hotmart/sync-schedules');
+  return data;
+}
+
+export async function createSyncSchedule(
+  payload: CreateHotmartSyncSchedulePayload,
+): Promise<HotmartSyncSchedule> {
+  const { data } = await hotmartClient.post<HotmartSyncSchedule>('/hotmart/sync-schedules', payload);
+  return data;
+}
+
+export async function deleteSyncSchedule(id: string): Promise<void> {
+  await hotmartClient.delete(`/hotmart/sync-schedules/${id}`);
+}
+
+export async function runSyncSchedule(id: string): Promise<{ status: string; message: string }> {
+  const { data } = await hotmartClient.post<{ status: string; message: string }>(
+    `/hotmart/sync-schedules/${id}/run`,
+    {},
   );
   return data;
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, LayoutDashboard, Target, Vote, Rocket, CalendarDays, FileText, BarChart3, Settings2, ShoppingCart } from "lucide-react";
+import { ChevronLeft, LayoutDashboard, Target, Vote, Rocket, CalendarDays, FileText, BarChart3, Settings2, ShoppingCart, Megaphone, TrendingUp } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoAlianca from "@/assets/logo-alianca.svg";
@@ -15,6 +15,8 @@ const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: BarChart3, label: "Dashboard Lançamentos", href: "/launch-dashboard" },
   { icon: ShoppingCart, label: "Vendas Hotmart", href: "/vendas-hotmart" },
+  { icon: Megaphone, label: "Meta Ads", href: "/meta-ads" },
+  { icon: TrendingUp, label: "Google Ads", href: "/google-ads" },
   { icon: Target, label: "Lead Capture", href: "/lead-capture" },
   { icon: Vote, label: "Vote Campaigns", href: "/vote-campaigns" },
   { icon: Rocket, label: "Launch", href: "/launch" },
