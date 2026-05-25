@@ -1,14 +1,25 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Link as LinkIcon, RefreshCw } from "lucide-react";
+import { Loader2, Link as LinkIcon, RefreshCw, Unlink } from "lucide-react";
 import { toast } from "sonner";
 import {
+  disconnectOAuthConnection,
   getAuthorizeUrl,
   getConnectionAccounts,
   refreshConnectionMarketingSyncAccounts,
   selectConnectionAccount,
 } from "@/api/syncs/marketing-sync";
 import type { OAuthConnection, OAuthConnectionAccount } from "@/types/syncs/marketing-sync";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +63,7 @@ export function ConnectionsSection({
 }: Readonly<ConnectionsSectionProps>) {
   const queryClient = useQueryClient();
   const [activeConnection, setActiveConnection] = useState<OAuthConnection | null>(null);
+  const [disconnectTarget, setDisconnectTarget] = useState<OAuthConnection | null>(null);
 
   const connectMutation = useMutation({
     mutationFn: (provider: "google_ads" | "meta_ads") => getAuthorizeUrl(provider),
@@ -94,47 +106,68 @@ export function ConnectionsSection({
     },
   });
 
+  const disconnectMutation = useMutation({
+    mutationFn: (connection: OAuthConnection) =>
+      disconnectOAuthConnection(connection.provider, connection.connectionId),
+    onSuccess: async (_, connection) => {
+      toast.success("Conexao desconectada.");
+      setDisconnectTarget(null);
+      if (activeConnection?.connectionId === connection.connectionId) {
+        setActiveConnection(null);
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["marketing-sync", "oauth-connections"] }),
+        queryClient.invalidateQueries({ queryKey: ["marketing-sync", "accounts"] }),
+        queryClient.invalidateQueries({ queryKey: ["marketing-sync", "connection-accounts"] }),
+      ]);
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Falha ao desconectar a conexao.");
+    },
+  });
+
   const activeTitle = useMemo(() => {
     if (!activeConnection) return "Contas da conexao";
     return `Contas da conexao ${activeConnection.connectionId}`;
   }, [activeConnection]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <CardTitle className="text-base">Conexoes OAuth</CardTitle>
-          <p className="text-sm text-muted-foreground">Gerencie conexoes Google Ads e Meta Ads.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(!provider || provider === "google_ads") && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => connectMutation.mutate("google_ads")}
-              disabled={connectMutation.isPending}
-            >
-              {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
-              Conectar Google Ads
+    <>
+      <Card>
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle className="text-base">Conexoes OAuth</CardTitle>
+            <p className="text-sm text-muted-foreground">Gerencie conexoes Google Ads e Meta Ads.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(!provider || provider === "google_ads") && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => connectMutation.mutate("google_ads")}
+                disabled={connectMutation.isPending}
+              >
+                {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+                Conectar Google Ads
+              </Button>
+            )}
+            {(!provider || provider === "meta_ads") && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => connectMutation.mutate("meta_ads")}
+                disabled={connectMutation.isPending}
+              >
+                {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+                Conectar Meta Ads
+              </Button>
+            )}
+            <Button type="button" variant="outline" onClick={onRefetch}>
+              Atualizar
             </Button>
-          )}
-          {(!provider || provider === "meta_ads") && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => connectMutation.mutate("meta_ads")}
-              disabled={connectMutation.isPending}
-            >
-              {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
-              Conectar Meta Ads
-            </Button>
-          )}
-          <Button type="button" variant="outline" onClick={onRefetch}>
-            Atualizar
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
         {isError && (
           <Alert variant="destructive">
             <AlertTitle>Falha ao carregar conexoes</AlertTitle>
@@ -183,7 +216,13 @@ export function ConnectionsSection({
                     <TableCell>{connection.selectedAccountName || connection.selectedAccountId || "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex gap-2">
-                        <Button type="button" size="sm" variant="outline" onClick={() => setActiveConnection(connection)}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setActiveConnection(connection)}
+                          disabled={connection.status === "disconnected"}
+                        >
                           Ver contas
                         </Button>
                         <Button
@@ -191,10 +230,21 @@ export function ConnectionsSection({
                           size="sm"
                           variant="outline"
                           onClick={() => refreshConnectionAccountsMutation.mutate(connection.connectionId)}
-                          disabled={refreshConnectionAccountsMutation.isPending}
+                          disabled={refreshConnectionAccountsMutation.isPending || connection.status === "disconnected"}
                         >
                           <RefreshCw className="mr-2 h-3.5 w-3.5" />
                           Sync
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDisconnectTarget(connection)}
+                          disabled={connection.status === "disconnected"}
+                        >
+                          <Unlink className="mr-2 h-3.5 w-3.5" />
+                          Desconectar
                         </Button>
                       </div>
                     </TableCell>
@@ -281,7 +331,30 @@ export function ConnectionsSection({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={!!disconnectTarget} onOpenChange={(open) => !open && setDisconnectTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Desconectar conta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso remove os tokens salvos e a conta selecionada desta conexao. Os dados historicos ja sincronizados
+              permanecem salvos, mas novos syncs exigirao uma nova conexao OAuth.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnectMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={disconnectMutation.isPending}
+              onClick={() => disconnectTarget && disconnectMutation.mutate(disconnectTarget)}
+            >
+              {disconnectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Desconectar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

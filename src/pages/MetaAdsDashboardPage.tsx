@@ -163,22 +163,6 @@ export default function MetaAdsDashboardPage() {
         </p>
       </div>
 
-      {isPerformanceTab && (
-        <>
-          <MetaFilters filters={filters} onChange={setFilters} />
-
-          {summary.isError && (
-            <Alert variant="destructive">
-              <AlertDescription>
-                Erro ao carregar dados. Verifique a conexão ou execute um sync.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <MetaKpiCards summary={summary.data} isLoading={summary.isLoading} />
-        </>
-      )}
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="resumo">Resumo</TabsTrigger>
@@ -188,6 +172,22 @@ export default function MetaAdsDashboardPage() {
           <TabsTrigger value="sincronizacao">Sincronização</TabsTrigger>
           <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
         </TabsList>
+
+        {isPerformanceTab && (
+          <div className="space-y-6 mt-6">
+            <MetaFilters filters={filters} onChange={setFilters} />
+
+            {summary.isError && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Erro ao carregar dados. Verifique a conexão ou execute um sync.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <MetaKpiCards summary={summary.data} isLoading={summary.isLoading} />
+          </div>
+        )}
 
         {/* ── Resumo ──────────────────────────────────────────────── */}
         <TabsContent value="resumo" className="space-y-4 mt-4">

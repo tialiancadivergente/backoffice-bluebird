@@ -261,6 +261,10 @@ export async function getConnectionAccounts(provider: string, connectionId: stri
   return readList(data).map(normalizeConnectionAccount);
 }
 
+export async function disconnectOAuthConnection(provider: string, connectionId: string) {
+  await api.delete(pathForProvider(provider, `/connections/${connectionId}`));
+}
+
 export async function selectConnectionAccount(
   provider: string,
   connectionId: string,
