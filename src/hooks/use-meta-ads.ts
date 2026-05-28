@@ -35,7 +35,8 @@ export const metaKeys = {
   adsets: (p?: object) => [...metaKeys.all, "adsets", p] as const,
   ads: (p?: object) => [...metaKeys.all, "ads", p] as const,
   performance: (f?: object) => [...metaKeys.all, "performance", f] as const,
-  executions: (p?: object) => [...metaKeys.all, "executions", p] as const,
+  executionsRoot: () => [...metaKeys.all, "executions"] as const,
+  executions: (p?: object) => [...metaKeys.executionsRoot(), p] as const,
   job: (id: string) => [...metaKeys.all, "job", id] as const,
 };
 
@@ -124,7 +125,12 @@ export function useMetaExecutions(
   return useQuery({
     queryKey: metaKeys.executions(params),
     queryFn: () => getMetaExecutions(params),
-    refetchInterval: 15_000,
+    refetchInterval: (query) => {
+      const executions = query.state.data;
+      return executions?.some((execution) => execution.status === "running")
+        ? 5_000
+        : 30_000;
+    },
     placeholderData: (prev) => prev,
   });
 }
@@ -152,7 +158,7 @@ export function useSyncMetaCampaigns() {
     onSuccess: (data) => {
       toast.success(`Campanhas sincronizadas: ${data.total} registros`);
       qc.invalidateQueries({ queryKey: metaKeys.campaigns() });
-      qc.invalidateQueries({ queryKey: metaKeys.executions() });
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao sincronizar campanhas"),
   });
@@ -165,7 +171,7 @@ export function useSyncMetaAdsets() {
     onSuccess: (data) => {
       toast.success(`Conjuntos sincronizados: ${data.total} registros`);
       qc.invalidateQueries({ queryKey: metaKeys.adsets() });
-      qc.invalidateQueries({ queryKey: metaKeys.executions() });
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao sincronizar conjuntos de anúncios"),
   });
@@ -178,7 +184,7 @@ export function useSyncMetaAds() {
     onSuccess: (data) => {
       toast.success(`Anúncios sincronizados: ${data.total} registros`);
       qc.invalidateQueries({ queryKey: metaKeys.ads() });
-      qc.invalidateQueries({ queryKey: metaKeys.executions() });
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao sincronizar anúncios"),
   });
@@ -192,7 +198,7 @@ export function useSyncMetaInsights() {
       toast.success(`Insights sincronizados: ${data.total} registros`);
       qc.invalidateQueries({ queryKey: metaKeys.summary() });
       qc.invalidateQueries({ queryKey: metaKeys.timeseries() });
-      qc.invalidateQueries({ queryKey: metaKeys.executions() });
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao sincronizar insights"),
   });
@@ -220,7 +226,7 @@ export function useStartMetaInsightsJob() {
     mutationFn: (p: MetaInsightsJobPayload) => startMetaInsightsJob(p),
     onSuccess: (data) => {
       toast.success(`Job iniciado: ${data.report_run_id}`);
-      qc.invalidateQueries({ queryKey: metaKeys.executions() });
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao iniciar job de insights"),
   });

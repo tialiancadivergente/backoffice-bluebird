@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, RefreshCw } from "lucide-react";
+import { HelpCircle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   patchMarketingSyncAccountSelection,
@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatusBadge } from "./StatusBadge";
 
 interface AccountsSectionProps {
@@ -31,10 +32,34 @@ function isManagerAccount(raw: Record<string, unknown> | undefined): boolean {
   return typeField.toUpperCase().includes("MANAGER");
 }
 
+function InfoTip({ children }: { children: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[320px] whitespace-normal">
+        {children}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function shortId(value: string | null | undefined) {
+  if (!value) return "—";
+  if (value.length <= 14) return value;
+  return `${value.slice(0, 8)}...${value.slice(-6)}`;
+}
+
+function accountNameLabel(account: { accountName: string | null; accountId: string }) {
+  return account.accountName || "Nome não sincronizado";
+}
+
 export function AccountsSection({ connections }: Readonly<AccountsSectionProps>) {
   const queryClient = useQueryClient();
   const [providerFilter, setProviderFilter] = useState<string>("all");
   const [connectionFilter, setConnectionFilter] = useState<string>("all");
+  const [selectionFilter, setSelectionFilter] = useState<string>("all");
 
   const accountsQuery = useMarketingSyncAccounts({
     provider: providerFilter === "all" ? undefined : providerFilter,
@@ -44,6 +69,15 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
   const providers = useMemo(() => {
     return Array.from(new Set(connections.map((item) => item.provider))).sort((a, b) => a.localeCompare(b));
   }, [connections]);
+
+  const accounts = accountsQuery.data ?? [];
+  const visibleAccounts = useMemo(() => {
+    if (selectionFilter === "selected") return accounts.filter((account) => account.selected);
+    if (selectionFilter === "available") return accounts.filter((account) => !account.selected);
+    return accounts;
+  }, [accounts, selectionFilter]);
+  const selectedCount = accounts.filter((account) => account.selected).length;
+  const selectableVisibleAccounts = visibleAccounts.filter((account) => !isManagerAccount(account.raw));
 
   const loadingRowKeys = ["loading-a", "loading-b", "loading-c", "loading-d"];
 
@@ -81,6 +115,23 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
     },
   });
 
+  const bulkSelectionMutation = useMutation({
+    mutationFn: async (selected: boolean) => {
+      await Promise.all(
+        selectableVisibleAccounts
+          .filter((account) => account.selected !== selected)
+          .map((account) => patchMarketingSyncAccountSelection(account.id, selected)),
+      );
+    },
+    onSuccess: () => {
+      toast.success("Selecao das contas atualizada.");
+      queryClient.invalidateQueries({ queryKey: ["marketing-sync", "accounts"] });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Falha ao atualizar contas em lote.");
+    },
+  });
+
   const tableBodyContent = (() => {
     if (accountsQuery.isLoading) {
       return loadingRowKeys.map((key) => (
@@ -92,7 +143,7 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
       ));
     }
 
-    if ((accountsQuery.data?.length ?? 0) === 0) {
+    if (accounts.length === 0) {
       return (
         <TableRow>
           <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
@@ -102,12 +153,29 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
       );
     }
 
-    return accountsQuery.data!.map((account) => (
+    if (visibleAccounts.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+            Nenhuma conta encontrada para este filtro.
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return visibleAccounts.map((account) => (
       <TableRow key={account.id} className={isManagerAccount(account.raw) ? "bg-yellow-50/40 dark:bg-yellow-900/10" : undefined}>
         <TableCell>{account.provider}</TableCell>
-        <TableCell className="font-mono text-xs">{account.connectionId || "—"}</TableCell>
+        <TableCell className="font-mono text-xs" title={account.connectionId || undefined}>{shortId(account.connectionId)}</TableCell>
         <TableCell className="font-mono text-xs">{account.accountId}</TableCell>
-        <TableCell>{account.accountName || "—"}</TableCell>
+        <TableCell>
+          <div className="flex flex-col">
+            <span>{accountNameLabel(account)}</span>
+            {!account.accountName && (
+              <span className="text-xs text-muted-foreground">ID: {account.accountId}</span>
+            )}
+          </div>
+        </TableCell>
         <TableCell>
           {isManagerAccount(account.raw) ? (
             <Badge variant="secondary" title="Conta gerenciadora (MCC). Nao suporta extracao direta de metricas.">MCC</Badge>
@@ -126,7 +194,7 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
             type="button"
             variant={isManagerAccount(account.raw) ? "destructive" : "outline"}
             size="sm"
-            disabled={patchSelectionMutation.isPending}
+            disabled={patchSelectionMutation.isPending || bulkSelectionMutation.isPending}
             title={isManagerAccount(account.raw) ? "Contas MCC nao suportam extracao de metricas. Selecione uma conta cliente." : undefined}
             onClick={() => patchSelectionMutation.mutate({ accountId: account.id, selected: !account.selected })}
           >
@@ -146,13 +214,20 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
     <Card>
       <CardHeader className="flex flex-col gap-3">
         <div>
-          <CardTitle className="text-base">Contas sincronizadas</CardTitle>
-          <p className="text-sm text-muted-foreground">Operacao de selecao e refresh das contas de marketing.</p>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base">3. Contas que entram no sync</CardTitle>
+            <InfoTip>
+              Contas selecionadas aqui serão usadas nos próximos jobs de sincronização. Selecione todas as contas que você quer trazer para os dashboards.
+            </InfoTip>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {selectedCount} conta{selectedCount === 1 ? "" : "s"} selecionada{selectedCount === 1 ? "" : "s"} para sync.
+          </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 lg:grid-cols-[minmax(180px,1fr)_minmax(220px,1fr)_minmax(180px,1fr)] xl:grid-cols-[minmax(220px,1fr)_minmax(260px,1fr)_minmax(220px,1fr)_auto]">
           <div className="space-y-1.5">
-            <Label>Provider</Label>
+            <Label className="text-sm leading-none">Provider</Label>
             <Select value={providerFilter} onValueChange={setProviderFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
@@ -169,7 +244,10 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
           </div>
 
           <div className="space-y-1.5">
-            <Label>Connection ID</Label>
+            <div className="flex h-5 items-center gap-1.5">
+              <Label className="text-sm leading-none">Conexão</Label>
+              <InfoTip>Filtra as contas de uma autorização específica. Na maioria dos casos, use “Todas”.</InfoTip>
+            </div>
             <Select value={connectionFilter} onValueChange={setConnectionFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Todas" />
@@ -178,21 +256,45 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
                 <SelectItem value="all">Todas</SelectItem>
                 {connections.map((connection) => (
                   <SelectItem key={connection.id} value={connection.connectionId}>
-                    {connection.connectionId}
+                    {connection.selectedAccountName || connection.userName || shortId(connection.connectionId)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-end gap-2">
-            <Button type="button" variant="outline" onClick={() => refreshAllMutation.mutate()} disabled={refreshAllMutation.isPending}>
+          <div className="space-y-1.5">
+            <div className="flex h-5 items-center gap-1.5">
+              <Label className="text-sm leading-none">Visualização</Label>
+              <InfoTip>Use para revisar só as contas selecionadas ou encontrar contas ainda fora do sync.</InfoTip>
+            </div>
+            <Select value={selectionFilter} onValueChange={setSelectionFilter}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="selected">Selecionadas</SelectItem>
+                <SelectItem value="available">Não selecionadas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-0 lg:col-span-3 lg:flex-row lg:items-end xl:col-span-1 xl:pt-5">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full whitespace-nowrap lg:w-auto"
+              onClick={() => refreshAllMutation.mutate()}
+              disabled={refreshAllMutation.isPending}
+            >
               {refreshAllMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Sync global
             </Button>
             <Button
               type="button"
               variant="outline"
+              className="w-full whitespace-nowrap lg:w-auto"
               disabled={connectionFilter === "all" || refreshConnectionMutation.isPending}
               onClick={() => refreshConnectionMutation.mutate(connectionFilter)}
             >
@@ -200,6 +302,29 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
               Sync conexao
             </Button>
           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="whitespace-nowrap"
+            disabled={accountsQuery.isLoading || bulkSelectionMutation.isPending || selectableVisibleAccounts.length === 0}
+            onClick={() => bulkSelectionMutation.mutate(true)}
+          >
+            Selecionar contas visíveis
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="whitespace-nowrap"
+            disabled={accountsQuery.isLoading || bulkSelectionMutation.isPending || selectableVisibleAccounts.length === 0}
+            onClick={() => bulkSelectionMutation.mutate(false)}
+          >
+            Desselecionar contas visíveis
+          </Button>
         </div>
       </CardHeader>
 
@@ -216,7 +341,7 @@ export function AccountsSection({ connections }: Readonly<AccountsSectionProps>)
             <TableHeader>
               <TableRow>
                 <TableHead>Provider</TableHead>
-                <TableHead>Connection ID</TableHead>
+                <TableHead>Conexão</TableHead>
                 <TableHead>ID Conta</TableHead>
                 <TableHead>Nome da conta</TableHead>
                 <TableHead>Tipo</TableHead>

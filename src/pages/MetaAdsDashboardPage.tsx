@@ -252,7 +252,7 @@ export default function MetaAdsDashboardPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => qc.invalidateQueries({ queryKey: metaKeys.executions() })}
+                onClick={() => qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() })}
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Loader2, Play, ChevronDown } from "lucide-react";
+import { ChevronDown, HelpCircle, Loader2, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   useSyncMetaAll,
   useSyncMetaCampaigns,
@@ -28,9 +30,21 @@ import type { MetaDatePreset, MetaSyncPayload } from "@/types/meta-ads";
 
 type JobType = "campaigns" | "adsets" | "ads" | "insights" | "all" | "async_job";
 
-function accountsLabel(accounts: Array<{ accountName?: string | null; accountId: string }>) {
-  if (accounts.length === 0) return "Nenhuma conta selecionada";
-  return accounts.map((a) => a.accountName ?? a.accountId).join(", ");
+function accountLabel(account: { accountName?: string | null; accountId: string }) {
+  return account.accountName || `Conta ${account.accountId}`;
+}
+
+function InfoTip({ children }: { children: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[320px] whitespace-normal">
+        {children}
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 export function MetaJobForm() {
@@ -78,7 +92,7 @@ export function MetaJobForm() {
       datePreset: dateMode === "preset" ? datePreset : undefined,
       since: dateMode === "range" ? since : undefined,
       until: dateMode === "range" ? until : undefined,
-      level,
+      level: jobType === "async_job" ? level : "ad",
       breakdowns: breakdowns === "none" ? undefined : breakdowns,
     };
   }
@@ -107,18 +121,32 @@ export function MetaJobForm() {
   }
 
   const showNodeId = jobType === "async_job";
-  const showLevel = jobType === "insights" || jobType === "async_job";
+  const showLevel = jobType === "async_job";
+  const showInsightsNote = jobType === "insights" || jobType === "all";
 
   return (
     <div className="space-y-4">
       {/* Conta / Conexão */}
-      <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Conta Meta Ads
-        </p>
+      <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Contas usadas neste sync
+            </p>
+            <InfoTip>
+              O job usa as contas marcadas como selecionadas na aba Conexão. Se escolher “Todas as conexões ativas”, todas as contas selecionadas de todas as conexões entram no sync.
+            </InfoTip>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {selectedAccounts.length} conta{selectedAccounts.length === 1 ? "" : "s"} selecionada{selectedAccounts.length === 1 ? "" : "s"}.
+          </p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className="text-xs">Conexão</Label>
+            <div className="flex items-center gap-1.5">
+              <Label className="text-xs">Conexão</Label>
+              <InfoTip>Use uma conexão específica só quando quiser limitar o sync a ela. Para a rotina normal, deixe todas as conexões ativas.</InfoTip>
+            </div>
             <Select
               value={selectedConnectionId}
               onValueChange={setSelectedConnectionId}
@@ -130,7 +158,7 @@ export function MetaJobForm() {
                 <SelectItem value="all">Todas as conexões ativas</SelectItem>
                 {metaConnections.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.userName ?? c.connectionId ?? c.id.slice(0, 8)}
+                    {c.selectedAccountName || c.userName || c.connectionId || c.id.slice(0, 8)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -138,19 +166,30 @@ export function MetaJobForm() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Contas selecionadas</Label>
-            <div className="h-8 px-3 flex items-center rounded-md border border-input bg-background text-xs text-muted-foreground">
-              {accountsQuery.isLoading ? "Carregando..." : accountsLabel(selectedAccounts)}
+            <div className="flex items-center gap-1.5">
+              <Label className="text-xs">Contas selecionadas</Label>
+              <InfoTip>Essas são as contas de anúncio que terão métricas importadas. Para mudar a lista, volte para Conexão e use “Selecionar”/“Desselecionar”.</InfoTip>
+            </div>
+            <div className="min-h-10 max-h-28 overflow-y-auto rounded-md border border-input bg-background p-2">
+              {accountsQuery.isLoading ? (
+                <span className="text-xs text-muted-foreground">Carregando contas...</span>
+              ) : selectedAccounts.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedAccounts.map((account) => (
+                    <Badge key={account.id} variant="secondary" className="max-w-full">
+                      <span className="truncate">{accountLabel(account)}</span>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-xs text-muted-foreground">Nenhuma conta selecionada para sync.</span>
+              )}
             </div>
           </div>
         </div>
         {selectedAccounts.length === 0 && !accountsQuery.isLoading && (
           <p className="text-xs text-amber-500">
-            Nenhuma conta ativa. Vá em{" "}
-            <a href="/meta-ads/conexao" className="underline">
-              Conexão
-            </a>{" "}
-            e selecione as contas.
+            Nenhuma conta ativa para sync. Volte para a aba Conexão e selecione pelo menos uma conta em “Contas que entram no sync”.
           </p>
         )}
       </div>
@@ -245,6 +284,14 @@ export function MetaJobForm() {
               ID da conta (act_...), campanha, conjunto ou anúncio. Use para períodos
               longos — a Meta retorna um report_run_id para polling.
             </p>
+          </div>
+        )}
+
+        {showInsightsNote && (
+          <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground sm:col-span-2">
+            Insights do dashboard são importados no nível Anúncio (ad), porque a
+            tabela de performance precisa do ID do anúncio para consolidar gasto,
+            cliques e conversões.
           </div>
         )}
       </div>
