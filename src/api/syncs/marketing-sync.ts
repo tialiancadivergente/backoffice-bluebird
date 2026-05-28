@@ -269,11 +269,14 @@ export async function selectConnectionAccount(
   provider: string,
   connectionId: string,
   accountId: string,
+  accountName?: string | null,
 ) {
   await api.post(pathForProvider(provider, `/connections/${connectionId}/select-account`), {
     accountId,
     externalAccountId: accountId,
     selectedAccountId: accountId,
+    accountName: accountName || undefined,
+    customerName: accountName || undefined,
   });
 }
 

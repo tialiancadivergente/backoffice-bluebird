@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Link as LinkIcon, RefreshCw, Unlink } from "lucide-react";
+import { CheckCircle2, HelpCircle, Loader2, Link as LinkIcon, RefreshCw, Unlink } from "lucide-react";
 import { toast } from "sonner";
 import {
   disconnectOAuthConnection,
@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatusBadge } from "./StatusBadge";
 
 function isManagerAccount(raw: Record<string, unknown> | undefined): boolean {
@@ -44,6 +45,33 @@ function AccountTypeBadge({ account }: { account: OAuthConnectionAccount }) {
   ) : (
     <Badge variant="outline">Cliente</Badge>
   );
+}
+
+function InfoTip({ children }: { children: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[320px] whitespace-normal">
+        {children}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function shortId(value: string | null | undefined) {
+  if (!value) return "—";
+  if (value.length <= 14) return value;
+  return `${value.slice(0, 8)}...${value.slice(-6)}`;
+}
+
+function accountLabel(account: OAuthConnectionAccount) {
+  return account.accountName || `Conta ${account.accountId}`;
+}
+
+function connectionLabel(connection: OAuthConnection) {
+  return connection.selectedAccountName || connection.userName || `${connection.provider} conectado`;
 }
 
 interface ConnectionsSectionProps {
@@ -94,8 +122,18 @@ export function ConnectionsSection({
   });
 
   const selectAccountMutation = useMutation({
-    mutationFn: ({ provider, connectionId, accountId }: { provider: string; connectionId: string; accountId: string }) =>
-      selectConnectionAccount(provider, connectionId, accountId),
+    mutationFn: ({
+      provider,
+      connectionId,
+      accountId,
+      accountName,
+    }: {
+      provider: string;
+      connectionId: string;
+      accountId: string;
+      accountName?: string | null;
+    }) =>
+      selectConnectionAccount(provider, connectionId, accountId, accountName),
     onSuccess: () => {
       toast.success("Conta oficial da conexao atualizada.");
       queryClient.invalidateQueries({ queryKey: ["marketing-sync", "oauth-connections"] });
@@ -127,8 +165,8 @@ export function ConnectionsSection({
   });
 
   const activeTitle = useMemo(() => {
-    if (!activeConnection) return "Contas da conexao";
-    return `Contas da conexao ${activeConnection.connectionId}`;
+    if (!activeConnection) return "2. Conta padrão da conexão";
+    return `2. Conta padrão da conexão`;
   }, [activeConnection]);
 
   return (
@@ -136,8 +174,8 @@ export function ConnectionsSection({
       <Card>
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="text-base">Conexoes OAuth</CardTitle>
-            <p className="text-sm text-muted-foreground">Gerencie conexoes Google Ads e Meta Ads.</p>
+            <CardTitle className="text-base">1. Conexão com a Meta</CardTitle>
+            <p className="text-sm text-muted-foreground">Autorize o acesso OAuth e escolha uma conta padrão para identificar a conexão.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {(!provider || provider === "google_ads") && (
@@ -179,11 +217,11 @@ export function ConnectionsSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Provider</TableHead>
+                <TableHead>Conexão</TableHead>
                 <TableHead>Usuario</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Connection ID</TableHead>
-                <TableHead>Conta selecionada</TableHead>
+                <TableHead>ID técnico</TableHead>
+                <TableHead>Conta padrão</TableHead>
                 <TableHead className="text-right">Acoes</TableHead>
               </TableRow>
             </TableHeader>
@@ -207,13 +245,29 @@ export function ConnectionsSection({
                 }
                 return connections.map((connection) => (
                   <TableRow key={connection.id}>
-                    <TableCell>{connection.provider}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{connectionLabel(connection)}</span>
+                        <span className="text-xs text-muted-foreground">{connection.provider}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{connection.userName || "—"}</TableCell>
                     <TableCell>
                       <StatusBadge status={connection.status} />
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{connection.connectionId}</TableCell>
-                    <TableCell>{connection.selectedAccountName || connection.selectedAccountId || "—"}</TableCell>
+                    <TableCell className="font-mono text-xs" title={connection.connectionId}>{shortId(connection.connectionId)}</TableCell>
+                    <TableCell>
+                      {connection.selectedAccountName || connection.selectedAccountId ? (
+                        <div className="flex flex-col">
+                          <span>{connection.selectedAccountName || "Nome não sincronizado"}</span>
+                          {connection.selectedAccountId && (
+                            <span className="text-xs text-muted-foreground">ID: {connection.selectedAccountId}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">Nenhuma definida</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex gap-2">
                         <Button
@@ -258,7 +312,15 @@ export function ConnectionsSection({
         {activeConnection && (
           <div className="rounded-lg border border-border p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h4 className="text-sm font-semibold">{activeTitle}</h4>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold">{activeTitle}</h4>
+                  <InfoTip>Escolha uma conta padrão para identificar esta conexão. Isso não limita o sync; as contas usadas nos jobs são selecionadas na seção “Contas que entram no sync”.</InfoTip>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Conexão {shortId(activeConnection.connectionId)}. A conta padrão é única.
+                </p>
+              </div>
               <Button type="button" variant="ghost" size="sm" onClick={() => connectionAccountsQuery.refetch()}>
                 Atualizar contas
               </Button>
@@ -298,7 +360,14 @@ export function ConnectionsSection({
                     return connectionAccountsQuery.data!.map((account) => (
                       <TableRow key={account.id} className={isManagerAccount(account.raw) ? "bg-yellow-50/40 dark:bg-yellow-900/10" : undefined}>
                         <TableCell className="font-mono text-xs">{account.accountId}</TableCell>
-                        <TableCell>{account.accountName || "—"}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{accountLabel(account)}</span>
+                            {!account.accountName && (
+                              <span className="text-xs text-muted-foreground">Nome não veio da Meta; usando ID.</span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell><AccountTypeBadge account={account} /></TableCell>
                         <TableCell>{account.currency || "—"}</TableCell>
                         <TableCell>{account.timezone || "—"}</TableCell>
@@ -315,12 +384,18 @@ export function ConnectionsSection({
                                 provider: activeConnection.provider,
                                 connectionId: activeConnection.connectionId,
                                 accountId: account.accountId,
+                                accountName: account.accountName,
                               })
                             }
                             disabled={selectAccountMutation.isPending}
                             title={isManagerAccount(account.raw) ? "Contas MCC nao suportam extracao de metricas. Selecione uma conta cliente." : undefined}
                           >
-                            {isManagerAccount(account.raw) ? "⚠ Selecionar (MCC)" : "Selecionar conta oficial"}
+                            {account.selected ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                Conta padrão
+                              </span>
+                            ) : isManagerAccount(account.raw) ? "⚠ Definir padrão (MCC)" : "Definir como padrão"}
                           </Button>
                         </TableCell>
                       </TableRow>
