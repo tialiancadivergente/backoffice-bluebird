@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarIcon, ChevronDown } from "lucide-react";
+import { CalendarIcon, ChevronDown, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -25,11 +25,17 @@ import {
 import { LaunchFunnelTable } from "@/components/launch-dashboard/LaunchFunnelTable";
 import { LaunchKpiCards } from "@/components/launch-dashboard/LaunchKpiCards";
 import { LaunchTimeseriesChart } from "@/components/launch-dashboard/LaunchTimeseriesChart";
+import { LaunchAwarenessCards } from "@/components/launch-dashboard/LaunchAwarenessCards";
+import { LaunchTierDistribution } from "@/components/launch-dashboard/LaunchTierDistribution";
+import { LaunchConfigModal } from "@/components/launch-dashboard/LaunchConfigModal";
 import {
+  useLaunchAwareness,
+  useLaunchConfig,
   useLaunchFunnelTable,
   useLaunchOptions,
   useLaunchSummary,
   useLaunchTimeseries,
+  useLaunchTierDistribution,
 } from "@/hooks/use-launch-dashboard";
 import type { LaunchDashboardFilters } from "@/types/launch-dashboard";
 
@@ -51,13 +57,18 @@ function defaultFilters(): LaunchDashboardFilters {
 export default function LaunchDashboardPage() {
   const [filters, setFilters] = useState<LaunchDashboardFilters>(defaultFilters);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
 
   const launchesQuery = useLaunchOptions();
   const summaryQuery = useLaunchSummary(filters);
   const timeseriesQuery = useLaunchTimeseries(filters);
   const funnelQuery = useLaunchFunnelTable(filters);
+  const awarenessQuery = useLaunchAwareness(filters);
+  const tierQuery = useLaunchTierDistribution(filters);
+  const configQuery = useLaunchConfig(filters.launchId);
 
   const launches = launchesQuery.data ?? [];
+  const selectedLaunch = launches.find((l) => l.id === filters.launchId);
 
   function setFilter<K extends keyof LaunchDashboardFilters>(
     key: K,
@@ -72,11 +83,24 @@ export default function LaunchDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard de Lançamentos</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Funil completo: anúncio → lead → checkout → venda Hotmart.
-        </p>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard de Lançamentos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Funil completo: anúncio → lead → checkout → venda Hotmart.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 shrink-0"
+          onClick={() => setConfigOpen(true)}
+          title="Configurações do dashboard"
+        >
+          <Settings className="h-4 w-4" />
+          <span className="hidden sm:inline">Configurações</span>
+        </Button>
       </div>
 
       {/* Filters */}
@@ -219,6 +243,25 @@ export default function LaunchDashboardPage() {
         />
       </section>
 
+      {/* Awareness Metrics */}
+      <section aria-label="Métricas de consciência e engajamento">
+        <h2 className="text-base font-semibold mb-3">Consciência e Engajamento</h2>
+        <LaunchAwarenessCards
+          data={awarenessQuery.data}
+          config={configQuery.data}
+          isLoading={awarenessQuery.isLoading}
+        />
+      </section>
+
+      {/* Tier Distribution */}
+      <section aria-label="Distribuição por faixa de leadscore">
+        <h2 className="text-base font-semibold mb-3">Distribuição por Faixa</h2>
+        <LaunchTierDistribution
+          data={tierQuery.data}
+          isLoading={tierQuery.isLoading}
+        />
+      </section>
+
       {/* Timeseries */}
       <section aria-label="Tendência diária">
         <h2 className="text-base font-semibold mb-3">Tendência</h2>
@@ -228,10 +271,10 @@ export default function LaunchDashboardPage() {
         />
       </section>
 
-      {/* Funnel Table */}
-      <section aria-label="Funil por anúncio">
+      {/* Funnel Table / Performance de Anúncios */}
+      <section aria-label="Performance de anúncios">
         <div className="flex items-baseline justify-between mb-3">
-          <h2 className="text-base font-semibold">Funil por anúncio</h2>
+          <h2 className="text-base font-semibold">Performance de Anúncios</h2>
           {funnelQuery.data && (
             <span className="text-xs text-muted-foreground">
               {funnelQuery.data.total} anúncio{funnelQuery.data.total !== 1 ? "s" : ""}
@@ -245,6 +288,14 @@ export default function LaunchDashboardPage() {
           onRetry={() => funnelQuery.refetch()}
         />
       </section>
+
+      {/* Config Modal */}
+      <LaunchConfigModal
+        open={configOpen}
+        onOpenChange={setConfigOpen}
+        launchId={filters.launchId}
+        launchName={selectedLaunch?.name}
+      />
     </div>
   );
 }

@@ -40,7 +40,7 @@ export async function syncMetaAds(payload: MetaSyncPayload) {
 
 export async function syncMetaInsights(payload: MetaSyncPayload) {
   const { data } = await api.post("/meta-ads/sync/insights", payload);
-  return data as { total: number; executionId: string };
+  return data as { queued?: boolean; total?: number; executionId: string };
 }
 
 export async function syncMetaAll(payload: MetaSyncPayload) {

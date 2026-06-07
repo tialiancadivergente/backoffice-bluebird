@@ -195,7 +195,11 @@ export function useSyncMetaInsights() {
   return useMutation({
     mutationFn: (p: MetaSyncPayload) => syncMetaInsights(p),
     onSuccess: (data) => {
-      toast.success(`Insights sincronizados: ${data.total} registros`);
+      toast.success(
+        data.queued
+          ? "Sync de insights iniciado. Acompanhe o progresso no histórico."
+          : `Insights sincronizados: ${data.total ?? 0} registros`,
+      );
       qc.invalidateQueries({ queryKey: metaKeys.summary() });
       qc.invalidateQueries({ queryKey: metaKeys.timeseries() });
       qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });

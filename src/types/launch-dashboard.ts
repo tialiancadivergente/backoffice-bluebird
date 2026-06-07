@@ -72,6 +72,63 @@ export interface LaunchFunnelRow {
   cpa: number | null;
 }
 
+export interface LaunchAwarenessMetrics {
+  totalLeads: number;
+  totalFormResponses: number;
+  surveyResponseRate: number | null;
+  consciousnessRate: number | null;
+  knowsEltonRate: number | null;
+  knowsAllianceRate: number | null;
+  configured: {
+    consciousness: boolean;
+    knowsElton: boolean;
+    knowsAlliance: boolean;
+  };
+}
+
+export interface LaunchTierDistributionItem {
+  tier: string;
+  tierName: string;
+  count: number;
+  percentage: number;
+}
+
+export interface LaunchTierDistribution {
+  distribution: LaunchTierDistributionItem[];
+  total: number;
+}
+
+export interface LaunchDashboardConfig {
+  id?: string;
+  launchId?: string;
+  // targets
+  targetSpend?: number | null;
+  targetLeads?: number | null;
+  targetCpl?: number | null;
+  targetConnectRate?: number | null;
+  targetPageConversion?: number | null;
+  targetCpc?: number | null;
+  targetCpm?: number | null;
+  targetCtr?: number | null;
+  targetSurveyResponseRate?: number | null;
+  targetConsciousnessRate?: number | null;
+  targetKnowsEltonRate?: number | null;
+  targetKnowsAllianceRate?: number | null;
+  // question keys
+  questionKeyConsciousness?: string | null;
+  positiveOptionKeyConsciousness?: string | null;
+  questionKeyKnowsElton?: string | null;
+  positiveOptionKeyKnowsElton?: string | null;
+  questionKeyKnowsAlliance?: string | null;
+  positiveOptionKeyKnowsAlliance?: string | null;
+}
+
+export interface AvailableQuestion {
+  questionKey: string;
+  questionText: string | null;
+  options: { optionKey: string; optionText: string | null }[];
+}
+
 export interface LaunchDashboardSummaryResponse {
   summary: LaunchDashboardSummary;
 }

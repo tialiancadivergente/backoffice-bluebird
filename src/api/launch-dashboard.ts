@@ -1,9 +1,13 @@
 import axios from "axios";
 import type {
+  AvailableQuestion,
+  LaunchDashboardConfig,
   LaunchDashboardFilters,
   LaunchDashboardFunnelResponse,
   LaunchDashboardSummaryResponse,
   LaunchDashboardTimeseriesResponse,
+  LaunchAwarenessMetrics,
+  LaunchTierDistribution,
   LaunchOption,
 } from "@/types/launch-dashboard";
 import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
@@ -52,4 +56,49 @@ export async function fetchLaunchFunnelTable(
     { params: toParams(filters) },
   );
   return data;
+}
+
+export async function fetchLaunchAwareness(
+  filters: LaunchDashboardFilters,
+): Promise<LaunchAwarenessMetrics> {
+  const { data } = await api.get<LaunchAwarenessMetrics>(
+    "/launch-dashboard/awareness",
+    { params: toParams(filters) },
+  );
+  return data;
+}
+
+export async function fetchLaunchTierDistribution(
+  filters: LaunchDashboardFilters,
+): Promise<LaunchTierDistribution> {
+  const { data } = await api.get<LaunchTierDistribution>(
+    "/launch-dashboard/tier-distribution",
+    { params: toParams(filters) },
+  );
+  return data;
+}
+
+export async function fetchLaunchConfig(launchId: string): Promise<LaunchDashboardConfig | null> {
+  const { data } = await api.get<LaunchDashboardConfig | null>(
+    `/launch-dashboard/config/${launchId}`,
+  );
+  return data;
+}
+
+export async function upsertLaunchConfig(
+  launchId: string,
+  config: LaunchDashboardConfig,
+): Promise<LaunchDashboardConfig> {
+  const { data } = await api.put<LaunchDashboardConfig>(
+    `/launch-dashboard/config/${launchId}`,
+    config,
+  );
+  return data;
+}
+
+export async function fetchAvailableQuestions(): Promise<AvailableQuestion[]> {
+  const { data } = await api.get<AvailableQuestion[]>(
+    "/launch-dashboard/available-questions",
+  );
+  return Array.isArray(data) ? data : [];
 }
