@@ -11,6 +11,7 @@ import {
   getMetaPerformance,
   getMetaPerformanceSummary,
   getMetaTimeseries,
+  startMetaBulkInsightsJob,
   startMetaInsightsJob,
   syncMetaAds,
   syncMetaAdsets,
@@ -19,6 +20,7 @@ import {
   syncMetaInsights,
 } from "@/api/meta-ads";
 import type {
+  MetaBulkInsightsPayload,
   MetaInsightsJobPayload,
   MetaPerformanceFilters,
   MetaSyncPayload,
@@ -233,6 +235,20 @@ export function useStartMetaInsightsJob() {
       qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao iniciar job de insights"),
+  });
+}
+
+export function useStartMetaBulkInsightsJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (p: MetaBulkInsightsPayload) => startMetaBulkInsightsJob(p),
+    onSuccess: (data) => {
+      toast.success(
+        `Bulk sync iniciado: ${data.totalJobs} jobs criados. Acompanhe o progresso no histórico.`,
+      );
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
+    },
+    onError: () => toast.error("Erro ao iniciar bulk sync de insights"),
   });
 }
 

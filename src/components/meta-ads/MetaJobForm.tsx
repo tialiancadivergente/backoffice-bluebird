@@ -24,11 +24,12 @@ import {
   useSyncMetaAds,
   useSyncMetaInsights,
   useStartMetaInsightsJob,
+  useStartMetaBulkInsightsJob,
 } from "@/hooks/use-meta-ads";
 import { useOAuthConnections, useMarketingSyncAccounts } from "@/hooks/use-marketing-sync";
 import type { MetaDatePreset, MetaSyncPayload } from "@/types/meta-ads";
 
-type JobType = "campaigns" | "adsets" | "ads" | "insights" | "all" | "async_job";
+type JobType = "campaigns" | "adsets" | "ads" | "insights" | "all" | "async_job" | "bulk_async";
 
 function accountLabel(account: { accountName?: string | null; accountId: string }) {
   return account.accountName || `Conta ${account.accountId}`;
@@ -58,6 +59,7 @@ export function MetaJobForm() {
   const [breakdowns, setBreakdowns] = useState("publisher_platform");
   const [nodeId, setNodeId] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [chunkDays, setChunkDays] = useState<number>(30);
 
   // Load Meta connections and their accounts
   const connectionsQuery = useOAuthConnections();
@@ -77,6 +79,7 @@ export function MetaJobForm() {
   const syncAds = useSyncMetaAds();
   const syncInsights = useSyncMetaInsights();
   const startJob = useStartMetaInsightsJob();
+  const startBulkJob = useStartMetaBulkInsightsJob();
 
   const isLoading =
     syncAll.isPending ||
@@ -84,7 +87,8 @@ export function MetaJobForm() {
     syncAdsets.isPending ||
     syncAds.isPending ||
     syncInsights.isPending ||
-    startJob.isPending;
+    startJob.isPending ||
+    startBulkJob.isPending;
 
   function buildPayload(): MetaSyncPayload {
     return {
@@ -117,12 +121,24 @@ export function MetaJobForm() {
         level,
         breakdowns: breakdowns === "none" ? undefined : breakdowns,
       });
+    } else if (jobType === "bulk_async") {
+      if (!since || !until) return;
+      startBulkJob.mutate({
+        connectionId: selectedConnectionId === "all" ? undefined : selectedConnectionId,
+        since,
+        until,
+        level,
+        breakdowns: breakdowns === "none" ? undefined : breakdowns,
+        chunkDays,
+      });
     }
   }
 
   const showNodeId = jobType === "async_job";
-  const showLevel = jobType === "async_job";
+  const showLevel = jobType === "async_job" || jobType === "bulk_async";
   const showInsightsNote = jobType === "insights" || jobType === "all";
+  const showChunkDays = jobType === "bulk_async";
+  const forceDateRange = jobType === "bulk_async" || jobType === "async_job";
 
   return (
     <div className="space-y-4">
@@ -198,17 +214,25 @@ export function MetaJobForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>Tipo de Job</Label>
-          <Select value={jobType} onValueChange={(v) => setJobType(v as JobType)}>
+          <Select
+            value={jobType}
+            onValueChange={(v) => {
+              const next = v as JobType;
+              setJobType(next);
+              if (next === "bulk_async" || next === "async_job") setDateMode("range");
+            }}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="insights">Insights (métricas)</SelectItem>
+              <SelectItem value="bulk_async">Insights Bulk Async (múltiplas contas + período longo)</SelectItem>
               <SelectItem value="campaigns">Campanhas</SelectItem>
               <SelectItem value="adsets">Conjuntos de Anúncios</SelectItem>
               <SelectItem value="ads">Anúncios (criativos)</SelectItem>
               <SelectItem value="all">Sync Completo (todos)</SelectItem>
-              <SelectItem value="async_job">Job Assíncrono (períodos longos)</SelectItem>
+              <SelectItem value="async_job">Job Assíncrono (node único, período longo)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -216,8 +240,11 @@ export function MetaJobForm() {
         <div className="space-y-1.5">
           <Label>Período</Label>
           <Select
-            value={dateMode}
-            onValueChange={(v) => setDateMode(v as "preset" | "range")}
+            value={forceDateRange ? "range" : dateMode}
+            onValueChange={(v) => {
+              if (!forceDateRange) setDateMode(v as "preset" | "range");
+            }}
+            disabled={forceDateRange}
           >
             <SelectTrigger>
               <SelectValue />
@@ -294,6 +321,48 @@ export function MetaJobForm() {
             cliques e conversões.
           </div>
         )}
+
+        {showChunkDays && (
+          <>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <Label>Tamanho do Chunk</Label>
+                <InfoTip>
+                  O período total é dividido em blocos deste tamanho. Cada bloco vira um job assíncrono por conta. Chunks menores são mais resilientes a falhas mas geram mais jobs.
+                </InfoTip>
+              </div>
+              <Select
+                value={String(chunkDays)}
+                onValueChange={(v) => setChunkDays(Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 dias por chunk</SelectItem>
+                  <SelectItem value="14">14 dias por chunk</SelectItem>
+                  <SelectItem value="30">30 dias por chunk</SelectItem>
+                  <SelectItem value="60">60 dias por chunk</SelectItem>
+                  <SelectItem value="90">90 dias por chunk</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground sm:col-span-2">
+              Cria um job assíncrono por conta × chunk, processando até 5 em paralelo.
+              Os resultados são salvos automaticamente — acompanhe no histórico de execuções.
+              {since && until && chunkDays && (() => {
+                const msPerChunk = chunkDays * 86400 * 1000;
+                const totalMs = new Date(until).getTime() - new Date(since).getTime();
+                const numChunks = Math.ceil(totalMs / msPerChunk) + 1;
+                const numAccounts = selectedAccounts.length;
+                return numAccounts > 0
+                  ? ` Estimativa: ${numAccounts} conta${numAccounts > 1 ? "s" : ""} × ~${numChunks} chunk${numChunks > 1 ? "s" : ""} = ~${numAccounts * numChunks} jobs.`
+                  : null;
+              })()}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Advanced params */}
@@ -349,7 +418,12 @@ export function MetaJobForm() {
 
       <Button
         onClick={handleRun}
-        disabled={isLoading || selectedAccounts.length === 0}
+        disabled={
+          isLoading ||
+          selectedAccounts.length === 0 ||
+          (jobType === "bulk_async" && (!since || !until)) ||
+          (jobType === "async_job" && (!nodeId || !since || !until))
+        }
         className="w-full sm:w-auto"
       >
         {isLoading ? (

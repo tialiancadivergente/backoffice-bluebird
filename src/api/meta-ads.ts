@@ -2,6 +2,7 @@ import axios from "axios";
 import { LEADS_API_BASE_URL, LEADS_API_HEADERS } from "@/api/leads-api-config";
 import type {
   MetaAsyncJobStatus,
+  MetaBulkInsightsPayload,
   MetaCampaign,
   MetaAd,
   MetaAdset,
@@ -58,6 +59,11 @@ export async function syncMetaAll(payload: MetaSyncPayload) {
 export async function startMetaInsightsJob(payload: MetaInsightsJobPayload) {
   const { data } = await api.post("/meta-ads/jobs/insights", payload);
   return data as { report_run_id: string };
+}
+
+export async function startMetaBulkInsightsJob(payload: MetaBulkInsightsPayload) {
+  const { data } = await api.post("/meta-ads/jobs/insights/bulk", payload);
+  return data as { queued: true; executionId: string; totalJobs: number };
 }
 
 export async function checkMetaJob(
