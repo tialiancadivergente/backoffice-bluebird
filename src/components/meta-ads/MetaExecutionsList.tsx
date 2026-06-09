@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, Square } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -11,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAbortMetaExecution } from "@/hooks/use-meta-ads";
 import type { MetaSyncExecution } from "@/types/meta-ads";
 
 type Props = {
@@ -26,6 +28,7 @@ const STATUS_VARIANT: Record<
   running: "secondary",
   failed: "destructive",
   partial: "outline",
+  aborted: "outline",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -33,6 +36,7 @@ const STATUS_LABEL: Record<string, string> = {
   running: "Executando",
   failed: "Falhou",
   partial: "Parcial",
+  aborted: "Abortado",
 };
 
 const STEP_LABEL: Record<string, string> = {
@@ -62,6 +66,7 @@ function durationLabel(startedAt: string, finishedAt?: string) {
 }
 
 export function MetaExecutionsList({ data, isLoading }: Props) {
+  const abort = useAbortMetaExecution();
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -115,6 +120,7 @@ export function MetaExecutionsList({ data, isLoading }: Props) {
               <TableHead>Período</TableHead>
               <TableHead>Acionado por</TableHead>
               <TableHead>Erro</TableHead>
+              <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -158,6 +164,20 @@ export function MetaExecutionsList({ data, isLoading }: Props) {
                     title={ex.error_message}
                   >
                     {ex.error_message ?? "—"}
+                  </TableCell>
+                  <TableCell>
+                    {ex.status === "running" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1.5 text-xs text-destructive hover:text-destructive"
+                        disabled={abort.isPending}
+                        onClick={() => abort.mutate(ex.id)}
+                      >
+                        <Square className="h-3 w-3 fill-current" />
+                        Abortar
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               );
