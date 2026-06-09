@@ -1,18 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  fetchAvailableQuestions,
+  fetchLaunchAwareness,
+  fetchLaunchConfig,
   fetchLaunchFunnelTable,
   fetchLaunchOptions,
   fetchLaunchSummary,
   fetchLaunchTimeseries,
+  fetchLaunchTierDistribution,
+  upsertLaunchConfig,
 } from "@/api/launch-dashboard";
-import type { LaunchDashboardFilters } from "@/types/launch-dashboard";
+import type { LaunchDashboardConfig, LaunchDashboardFilters } from "@/types/launch-dashboard";
 
 const launchDashKeys = {
   launches: () => ["launch-dashboard", "launches"] as const,
   summary: (f: LaunchDashboardFilters) => ["launch-dashboard", "summary", f] as const,
   timeseries: (f: LaunchDashboardFilters) => ["launch-dashboard", "timeseries", f] as const,
   funnel: (f: LaunchDashboardFilters) => ["launch-dashboard", "funnel", f] as const,
+  awareness: (f: LaunchDashboardFilters) => ["launch-dashboard", "awareness", f] as const,
+  tierDistribution: (f: LaunchDashboardFilters) => ["launch-dashboard", "tier-distribution", f] as const,
+  config: (launchId: string) => ["launch-dashboard", "config", launchId] as const,
+  availableQuestions: () => ["launch-dashboard", "available-questions"] as const,
 };
+
+function hasRequiredDates(f: LaunchDashboardFilters) {
+  return Boolean(f.dateFrom && f.dateTo);
+}
 
 export function useLaunchOptions() {
   return useQuery({
@@ -20,10 +33,6 @@ export function useLaunchOptions() {
     queryFn: fetchLaunchOptions,
     staleTime: 60_000,
   });
-}
-
-function hasRequiredDates(f: LaunchDashboardFilters) {
-  return Boolean(f.dateFrom && f.dateTo);
 }
 
 export function useLaunchSummary(filters: LaunchDashboardFilters) {
@@ -50,5 +59,52 @@ export function useLaunchFunnelTable(filters: LaunchDashboardFilters) {
     queryFn: () => fetchLaunchFunnelTable(filters),
     enabled: hasRequiredDates(filters),
     placeholderData: (prev) => prev,
+  });
+}
+
+export function useLaunchAwareness(filters: LaunchDashboardFilters) {
+  return useQuery({
+    queryKey: launchDashKeys.awareness(filters),
+    queryFn: () => fetchLaunchAwareness(filters),
+    enabled: hasRequiredDates(filters),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useLaunchTierDistribution(filters: LaunchDashboardFilters) {
+  return useQuery({
+    queryKey: launchDashKeys.tierDistribution(filters),
+    queryFn: () => fetchLaunchTierDistribution(filters),
+    enabled: hasRequiredDates(filters),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useLaunchConfig(launchId: string | undefined) {
+  return useQuery({
+    queryKey: launchDashKeys.config(launchId ?? ""),
+    queryFn: () => fetchLaunchConfig(launchId!),
+    enabled: Boolean(launchId),
+    staleTime: 30_000,
+  });
+}
+
+export function useAvailableQuestions() {
+  return useQuery({
+    queryKey: launchDashKeys.availableQuestions(),
+    queryFn: fetchAvailableQuestions,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useUpsertLaunchConfig(launchId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (config: LaunchDashboardConfig) => upsertLaunchConfig(launchId!, config),
+    onSuccess: () => {
+      if (launchId) {
+        qc.invalidateQueries({ queryKey: launchDashKeys.config(launchId) });
+      }
+    },
   });
 }
