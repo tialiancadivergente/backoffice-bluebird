@@ -215,6 +215,16 @@ export type MetaInsightsJobPayload = {
   breakdowns?: string;
 };
 
+export type MetaBulkInsightsPayload = {
+  connectionId?: string;
+  accountIds?: string[];
+  since: string;
+  until: string;
+  level?: string;
+  breakdowns?: string;
+  chunkDays?: number;
+};
+
 // ─── Paginated response ───────────────────────────────────────────────────────
 
 export type MetaPagedResult<T> = {
