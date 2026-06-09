@@ -170,6 +170,11 @@ export async function getMetaExecutions(params?: {
   return data;
 }
 
+export async function abortMetaExecution(id: string): Promise<{ aborted: boolean; message: string }> {
+  const { data } = await api.post(`/meta-ads/executions/${id}/abort`);
+  return data;
+}
+
 export async function importMetaCsv(file: File): Promise<{ imported: number; skipped: number }> {
   const form = new FormData();
   form.append("file", file);

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  abortMetaExecution,
   checkMetaJob,
   getMetaAdsets,
   getMetaAds,
@@ -249,6 +250,22 @@ export function useStartMetaBulkInsightsJob() {
       qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
     },
     onError: () => toast.error("Erro ao iniciar bulk sync de insights"),
+  });
+}
+
+export function useAbortMetaExecution() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => abortMetaExecution(id),
+    onSuccess: (data) => {
+      if (data.aborted) {
+        toast.success("Sync abortado com sucesso.");
+      } else {
+        toast.warning(data.message);
+      }
+      qc.invalidateQueries({ queryKey: metaKeys.executionsRoot() });
+    },
+    onError: () => toast.error("Erro ao abortar execução"),
   });
 }
 

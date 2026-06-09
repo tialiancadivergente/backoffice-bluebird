@@ -19,7 +19,7 @@ export type MetaDatePreset =
 
 export type MetaSyncStep = 'campaigns' | 'adsets' | 'ads' | 'insights' | 'full';
 
-export type MetaSyncStatus = 'running' | 'completed' | 'failed' | 'partial';
+export type MetaSyncStatus = 'running' | 'completed' | 'failed' | 'partial' | 'aborted';
 
 export type MetaEntityStatus =
   | 'ACTIVE'
