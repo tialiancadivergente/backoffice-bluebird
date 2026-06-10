@@ -163,6 +163,12 @@ export type MetaCampaignBreakdown = {
 
 // ─── Sync execution history ───────────────────────────────────────────────────
 
+export type MetaSyncExecutionMetadata = {
+  totalJobs?: number;
+  doneJobs?: number;
+  logs?: string[];
+};
+
 export type MetaSyncExecution = {
   id: string;
   triggered_by: string;
@@ -173,6 +179,7 @@ export type MetaSyncExecution = {
   date_to?: string;
   records_processed: number;
   error_message?: string;
+  metadata?: MetaSyncExecutionMetadata;
   started_at: string;
   finished_at?: string;
 };
