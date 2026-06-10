@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { AlertTriangle, Loader2, Square } from "lucide-react";
+import { AlertTriangle, Loader2, ScrollText, Square } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { useAbortMetaExecution } from "@/hooks/use-meta-ads";
 import type { MetaSyncExecution } from "@/types/meta-ads";
+import { MetaExecutionLogsSheet } from "./MetaExecutionLogsSheet";
 
 type Props = {
   data?: MetaSyncExecution[];
@@ -67,6 +69,7 @@ function durationLabel(startedAt: string, finishedAt?: string) {
 
 export function MetaExecutionsList({ data, isLoading }: Props) {
   const abort = useAbortMetaExecution();
+  const [logsExecution, setLogsExecution] = useState<MetaSyncExecution | null>(null);
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -166,18 +169,31 @@ export function MetaExecutionsList({ data, isLoading }: Props) {
                     {ex.error_message ?? "—"}
                   </TableCell>
                   <TableCell>
-                    {ex.status === "running" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 gap-1.5 text-xs text-destructive hover:text-destructive"
-                        disabled={abort.isPending}
-                        onClick={() => abort.mutate(ex.id)}
-                      >
-                        <Square className="h-3 w-3 fill-current" />
-                        Abortar
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {(ex.metadata?.logs?.length ?? 0) > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1.5 text-xs"
+                          onClick={() => setLogsExecution(ex)}
+                        >
+                          <ScrollText className="h-3 w-3" />
+                          Logs
+                        </Button>
+                      )}
+                      {ex.status === "running" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1.5 text-xs text-destructive hover:text-destructive"
+                          disabled={abort.isPending}
+                          onClick={() => abort.mutate(ex.id)}
+                        >
+                          <Square className="h-3 w-3 fill-current" />
+                          Abortar
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               );
@@ -185,6 +201,12 @@ export function MetaExecutionsList({ data, isLoading }: Props) {
           </TableBody>
         </Table>
       </div>
+
+      <MetaExecutionLogsSheet
+        execution={data?.find((e) => e.id === logsExecution?.id) ?? logsExecution}
+        open={logsExecution !== null}
+        onOpenChange={(open) => { if (!open) setLogsExecution(null); }}
+      />
     </div>
   );
 }
