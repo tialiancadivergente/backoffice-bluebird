@@ -35,6 +35,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw } from "lucide-react";
+import { MetaAdsSyncSchedules } from "@/components/meta-ads/MetaAdsSyncSchedules";
 
 const PERFORMANCE_TABS = new Set(["resumo", "tendencia", "campanhas"]);
 
@@ -245,6 +246,8 @@ export default function MetaAdsDashboardPage() {
               <li><strong>Sync Completo</strong> — Executa os 4 tipos em paralelo.</li>
             </ul>
           </div>
+
+          <MetaAdsSyncSchedules />
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">

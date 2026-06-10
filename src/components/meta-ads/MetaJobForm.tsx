@@ -31,6 +31,28 @@ import type { MetaDatePreset, MetaSyncPayload } from "@/types/meta-ads";
 
 type JobType = "campaigns" | "adsets" | "ads" | "insights" | "all" | "async_job" | "bulk_async";
 
+function resolvePresetDates(preset: MetaDatePreset): { since: string; until: string } {
+  const fmt = (d: Date) => d.toISOString().split("T")[0];
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 86400000);
+  if (preset === "today") return { since: fmt(today), until: fmt(today) };
+  if (preset === "yesterday") return { since: fmt(yesterday), until: fmt(yesterday) };
+  if (preset === "last_7d") return { since: fmt(new Date(today.getTime() - 7 * 86400000)), until: fmt(today) };
+  if (preset === "last_14d") return { since: fmt(new Date(today.getTime() - 14 * 86400000)), until: fmt(today) };
+  if (preset === "last_30d") return { since: fmt(new Date(today.getTime() - 30 * 86400000)), until: fmt(today) };
+  if (preset === "last_90d") return { since: fmt(new Date(today.getTime() - 90 * 86400000)), until: fmt(today) };
+  if (preset === "this_month") {
+    const start = new Date(today.getFullYear(), today.getMonth(), 1);
+    return { since: fmt(start), until: fmt(today) };
+  }
+  if (preset === "last_month") {
+    const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const end = new Date(today.getFullYear(), today.getMonth(), 0);
+    return { since: fmt(start), until: fmt(end) };
+  }
+  return { since: fmt(yesterday), until: fmt(yesterday) };
+}
+
 function accountLabel(account: { accountName?: string | null; accountId: string }) {
   return account.accountName || `Conta ${account.accountId}`;
 }
@@ -122,11 +144,12 @@ export function MetaJobForm() {
         breakdowns: breakdowns === "none" ? undefined : breakdowns,
       });
     } else if (jobType === "bulk_async") {
-      if (!since || !until) return;
+      const dates = dateMode === "preset" ? resolvePresetDates(datePreset) : { since, until };
+      if (!dates.since || !dates.until) return;
       startBulkJob.mutate({
         connectionId: selectedConnectionId === "all" ? undefined : selectedConnectionId,
-        since,
-        until,
+        since: dates.since,
+        until: dates.until,
         level,
         breakdowns: breakdowns === "none" ? undefined : breakdowns,
         chunkDays,
@@ -138,7 +161,7 @@ export function MetaJobForm() {
   const showLevel = jobType === "async_job" || jobType === "bulk_async";
   const showInsightsNote = jobType === "insights" || jobType === "all";
   const showChunkDays = jobType === "bulk_async";
-  const forceDateRange = jobType === "bulk_async" || jobType === "async_job";
+  const forceDateRange = jobType === "async_job";
 
   return (
     <div className="space-y-4">
@@ -219,7 +242,7 @@ export function MetaJobForm() {
             onValueChange={(v) => {
               const next = v as JobType;
               setJobType(next);
-              if (next === "bulk_async" || next === "async_job") setDateMode("range");
+              if (next === "async_job") setDateMode("range");
             }}
           >
             <SelectTrigger>
@@ -421,7 +444,7 @@ export function MetaJobForm() {
         disabled={
           isLoading ||
           selectedAccounts.length === 0 ||
-          (jobType === "bulk_async" && (!since || !until)) ||
+          (jobType === "bulk_async" && dateMode === "range" && (!since || !until)) ||
           (jobType === "async_job" && (!nodeId || !since || !until))
         }
         className="w-full sm:w-auto"

@@ -15,6 +15,8 @@ import type {
   MetaSyncExecution,
   MetaSyncPayload,
   MetaTimeseriesPoint,
+  MetaSyncSchedule,
+  CreateMetaSyncSchedulePayload,
 } from "@/types/meta-ads";
 
 const api = axios.create({
@@ -194,4 +196,25 @@ export function getMetaCsvExportUrl(filters?: MetaPerformanceFilters & { limit?:
   if (filters?.platform) params.set("platform", filters.platform);
   if (filters?.limit) params.set("limit", String(filters.limit));
   return `${LEADS_API_BASE_URL}/meta-ads/data/export/csv?${params.toString()}`;
+}
+
+export async function getMetaSyncSchedules(): Promise<MetaSyncSchedule[]> {
+  const { data } = await api.get<MetaSyncSchedule[]>('/meta-ads/sync-schedules');
+  return data;
+}
+
+export async function createMetaSyncSchedule(
+  payload: CreateMetaSyncSchedulePayload,
+): Promise<MetaSyncSchedule> {
+  const { data } = await api.post<MetaSyncSchedule>('/meta-ads/sync-schedules', payload);
+  return data;
+}
+
+export async function deleteMetaSyncSchedule(id: string): Promise<void> {
+  await api.post(`/meta-ads/sync-schedules/${id}/delete`);
+}
+
+export async function runMetaSyncSchedule(id: string): Promise<{ status: string }> {
+  const { data } = await api.post<{ status: string }>(`/meta-ads/sync-schedules/${id}/run`);
+  return data;
 }

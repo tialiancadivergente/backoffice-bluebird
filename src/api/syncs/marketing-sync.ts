@@ -79,6 +79,8 @@ function resolveAccountName(record: Record<string, unknown>) {
     firstString(record, [
       "accountName",
       "account_name",
+      "externalAccountName",
+      "external_account_name",
       "customerName",
       "customer_name",
       "descriptiveName",

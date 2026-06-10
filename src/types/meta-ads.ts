@@ -238,3 +238,31 @@ export type MetaPagedResult<T> = {
   items: T[];
   total: number;
 };
+
+export type MetaSyncStep = 'insights' | 'campaigns' | 'adsets' | 'ads' | 'full' | 'insights_bulk';
+
+export interface MetaSyncSchedule {
+  id: string;
+  name?: string;
+  sync_step: MetaSyncStep;
+  period_preset: 'yesterday' | 'last_7d' | 'last_30d' | 'last_90d' | 'custom';
+  date_from?: string;
+  date_to?: string;
+  level: string;
+  scheduled_time: string;
+  active: boolean;
+  last_run_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMetaSyncSchedulePayload {
+  name?: string;
+  sync_step: MetaSyncStep;
+  period_preset: 'yesterday' | 'last_7d' | 'last_30d' | 'last_90d' | 'custom';
+  date_from?: string;
+  date_to?: string;
+  level?: string;
+  scheduled_time: string;
+  active?: boolean;
+}

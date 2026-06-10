@@ -7,7 +7,7 @@ import { CreateCampaignDialog } from "@/components/vote-campaigns/CreateCampaign
 
 export default function VoteCampaignsPage() {
   const { data, isLoading, isError } = useVoteCampaigns();
-  const items = Array.isArray(data) ? data : (data as any)?.items ?? [];
+  const items = Array.isArray(data) ? data : (data as { items?: unknown[] } | undefined)?.items ?? [];
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (

@@ -292,3 +292,10 @@ export function useGetMetaJobResults() {
     onError: () => toast.error("Erro ao recuperar resultados do job"),
   });
 }
+
+export function useMetaSyncSchedules() {
+  return useQuery({
+    queryKey: ['meta-sync-schedules'],
+    queryFn: () => import('@/api/meta-ads').then(m => m.getMetaSyncSchedules()),
+  });
+}
