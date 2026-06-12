@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarIcon, ChevronDown, Settings } from "lucide-react";
+import { CalendarIcon, Check, ChevronDown, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,7 @@ export default function LaunchDashboardPage() {
   const [configOpen, setConfigOpen] = useState(false);
 
   const launchesQuery = useLaunchOptions();
-  const adAccountsQuery = useAdAccounts(filters);
+  const adAccountsQuery = useAdAccounts({ ...filters, externalAccountId: undefined });
   const summaryQuery = useLaunchSummary(filters);
   const timeseriesQuery = useLaunchTimeseries(filters);
   const funnelQuery = useLaunchFunnelTable(filters);
@@ -90,6 +90,16 @@ export default function LaunchDashboardPage() {
   const configQuery = useLaunchConfig(filters.launchId);
 
   const adAccounts = adAccountsQuery.data ?? [];
+  const selectedAccountIds = filters.externalAccountId
+    ? filters.externalAccountId.split(",")
+    : [];
+
+  function toggleAccount(id: string) {
+    const next = selectedAccountIds.includes(id)
+      ? selectedAccountIds.filter((a) => a !== id)
+      : [...selectedAccountIds, id];
+    setFilter("externalAccountId", next.length ? next.join(",") : undefined);
+  }
 
   const launches = launchesQuery.data ?? [];
   const selectedLaunch = launches.find((l) => l.id === filters.launchId);
@@ -218,24 +228,59 @@ export default function LaunchDashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Conta de Anúncio</Label>
-                <Select
-                  value={filters.externalAccountId ?? "all"}
-                  onValueChange={(v) =>
-                    setFilter("externalAccountId", v === "all" ? undefined : v)
-                  }
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Todas as contas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as contas</SelectItem>
-                    {adAccounts.map((a) => (
-                      <SelectItem key={a.externalAccountId} value={a.externalAccountId}>
-                        {a.accountName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-9 w-full justify-between font-normal text-sm"
+                    >
+                      <span className="truncate">
+                        {selectedAccountIds.length === 0
+                          ? "Todas as contas"
+                          : selectedAccountIds.length === 1
+                            ? (adAccounts.find((a) => a.externalAccountId === selectedAccountIds[0])?.accountName ?? selectedAccountIds[0])
+                            : `${selectedAccountIds.length} contas`}
+                      </span>
+                      <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50 ml-2" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-2" align="start">
+                    <div className="max-h-60 overflow-y-auto space-y-0.5">
+                      {adAccounts.length === 0 && (
+                        <p className="text-xs text-muted-foreground px-2 py-1">
+                          {adAccountsQuery.isLoading ? "Carregando..." : "Nenhuma conta disponível"}
+                        </p>
+                      )}
+                      {adAccounts.map((a) => {
+                        const checked = selectedAccountIds.includes(a.externalAccountId);
+                        return (
+                          <button
+                            key={a.externalAccountId}
+                            type="button"
+                            onClick={() => toggleAccount(a.externalAccountId)}
+                            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted text-left"
+                          >
+                            <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${checked ? "bg-primary border-primary" : "border-input"}`}>
+                              {checked && <Check className="h-3 w-3 text-primary-foreground" />}
+                            </span>
+                            <span className="truncate">{a.accountName}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedAccountIds.length > 0 && (
+                      <div className="border-t mt-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setFilter("externalAccountId", undefined)}
+                          className="text-xs text-muted-foreground hover:text-foreground w-full text-left px-2"
+                        >
+                          Limpar seleção
+                        </button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Campanha ID</Label>
