@@ -362,10 +362,19 @@ export default function LaunchDashboardPage() {
       {/* Timeseries */}
       <section aria-label="Tendência diária">
         <h2 className="text-base font-semibold mb-3">Tendência</h2>
-        <LaunchTimeseriesChart
-          data={timeseriesQuery.data?.timeseries ?? []}
-          isLoading={timeseriesQuery.isLoading}
-        />
+        <div className="relative">
+          <div className="pointer-events-none select-none blur-sm opacity-60">
+            <LaunchTimeseriesChart
+              data={timeseriesQuery.data?.timeseries ?? []}
+              isLoading={timeseriesQuery.isLoading}
+            />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-sm font-medium text-muted-foreground bg-background/80 px-4 py-2 rounded-md border border-border">
+              Em breve
+            </span>
+          </div>
+        </div>
       </section>
 
       {/* Funnel Table / Performance de Anúncios */}
