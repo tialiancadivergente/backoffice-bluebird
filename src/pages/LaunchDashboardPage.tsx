@@ -100,7 +100,7 @@ function buildShareMessage(
   const dot = (actual: number | null | undefined, target: number | null | undefined, dir: "hi" | "lo") => {
     if (actual == null || !target) return "";
     const r = dir === "hi" ? actual / target : target / actual;
-    return r >= 1 ? " 🟢" : r >= 0.9 ? " 🟡" : " 🔴";
+    return r >= 1 ? " \u{1F7E2}" : r >= 0.9 ? " \u{1F7E1}" : " \u{1F534}";
   };
 
   const fmtDate = (d: string) => d.split("-").reverse().join("/");
@@ -111,8 +111,8 @@ function buildShareMessage(
     ? `${fmtDate(filters.dateFrom)} a ${fmtDate(filters.dateTo)}`
     : "";
 
-  lines.push(`📊 *Dashboard ${launch}${period ? ` — ${period}` : ""}*`);
-  if (accountNames.length > 0) lines.push(`🔍 Contas: ${accountNames.join(", ")}`);
+  lines.push(`\u{1F4CA} *Dashboard ${launch}${period ? ` — ${period}` : ""}*`);
+  if (accountNames.length > 0) lines.push(`Contas: ${accountNames.join(", ")}`);
 
   if (!summary) {
     lines.push("\n_Sem dados disponíveis_");
@@ -120,41 +120,41 @@ function buildShareMessage(
   }
 
   lines.push("\n━━━━━━━━━━━━━━━━━━━━");
-  lines.push("💼 *MÍDIA*\n");
-  lines.push(`💰 Gasto: ${cur(summary.spend)}${config?.targetSpend ? ` (META: ${cur(config.targetSpend)}${dot(summary.spend, config.targetSpend, "hi")})` : ""}`);
+  lines.push("\u{1F4BC} *MÍDIA*\n");
+  lines.push(`Gasto: ${cur(summary.spend)}${config?.targetSpend ? ` (META: ${cur(config.targetSpend)}${dot(summary.spend, config.targetSpend, "hi")})` : ""}`);
   lines.push(`   CPM: ${cur(summary.cpm)}${config?.targetCpm ? ` (META: ${cur(config.targetCpm)}${dot(summary.cpm, config.targetCpm, "lo")})` : ""}`);
-  lines.push(`📣 Impressões: ${int(summary.impressions)}`);
+  lines.push(`Impressões: ${int(summary.impressions)}`);
   lines.push(`   CTR: ${pct(summary.ctr)}${config?.targetCtr ? ` (META: ${pct(config.targetCtr)}${dot(summary.ctr, config.targetCtr, "hi")})` : ""}`);
-  lines.push(`🖱️ Cliques: ${int(summary.clicks)}`);
+  lines.push(`Cliques: ${int(summary.clicks)}`);
   lines.push(`   CPC: ${cur(summary.cpc)}${config?.targetCpc ? ` (META: ${cur(config.targetCpc)}${dot(summary.cpc, config.targetCpc, "lo")})` : ""}`);
-  lines.push(`🔗 Cliques Link: ${int(summary.inlineLinkClicks)}`);
+  lines.push(`Cliques Link: ${int(summary.inlineLinkClicks)}`);
   lines.push(`   Connect Rate: ${pct(summary.connectRate)}${config?.targetConnectRate ? ` (META: ${pct(config.targetConnectRate)}${dot(summary.connectRate, config.targetConnectRate, "hi")})` : ""}`);
-  lines.push(`📄 Pág. Visualizadas: ${int(summary.landingPageViews)}`);
+  lines.push(`Pág. Visualizadas: ${int(summary.landingPageViews)}`);
   lines.push(`   Tx PgV→CK: ${pct(summary.txPgvCheckout)}${config?.targetPageConversion ? ` (META: ${pct(config.targetPageConversion)}${dot(summary.txPgvCheckout, config.targetPageConversion, "hi")})` : ""}`);
 
   lines.push("\n━━━━━━━━━━━━━━━━━━━━");
-  lines.push("🎯 *FUNIL CRM*\n");
-  lines.push(`👥 Leads: ${int(summary.leads)}${config?.targetLeads ? ` (META: ${int(config.targetLeads)}${dot(summary.leads, config.targetLeads, "hi")})` : ""}`);
+  lines.push("\u{1F3AF} *FUNIL CRM*\n");
+  lines.push(`Leads: ${int(summary.leads)}${config?.targetLeads ? ` (META: ${int(config.targetLeads)}${dot(summary.leads, config.targetLeads, "hi")})` : ""}`);
   lines.push(`   CPL: ${cur(summary.cpl)}${config?.targetCpl ? ` (META: ${cur(config.targetCpl)}${dot(summary.cpl, config.targetCpl, "lo")})` : ""}`);
-  lines.push(`🛒 Inicios Checkout: ${int(summary.initiateCheckouts)}`);
-  lines.push(`🏆 Vendas Hotmart: ${int(summary.sales)}`);
-  lines.push(`💰 Receita: ${cur(summary.revenue)}`);
+  lines.push(`Inicios Checkout: ${int(summary.initiateCheckouts)}`);
+  lines.push(`Vendas Hotmart: ${int(summary.sales)}`);
+  lines.push(`Receita: ${cur(summary.revenue)}`);
 
   if (awareness) {
     lines.push("\n━━━━━━━━━━━━━━━━━━━━");
-    lines.push("🧠 *CONSCIÊNCIA E ENGAJAMENTO*\n");
-    lines.push(`📋 Taxa Resposta Pesquisa: ${pct(awareness.surveyResponseRate)}`);
+    lines.push("\u{1F4CA} *CONSCIÊNCIA E ENGAJAMENTO*\n");
+    lines.push(`Taxa Resposta Pesquisa: ${pct(awareness.surveyResponseRate)}`);
     if (awareness.configured.consciousness)
-      lines.push(`💡 Taxa de Consciência: ${pct(awareness.consciousnessRate)}${config?.targetConsciousnessRate ? ` (META: ${pct(config.targetConsciousnessRate)}${dot(awareness.consciousnessRate, config.targetConsciousnessRate, "hi")})` : ""}`);
+      lines.push(`Taxa de Consciência: ${pct(awareness.consciousnessRate)}${config?.targetConsciousnessRate ? ` (META: ${pct(config.targetConsciousnessRate)}${dot(awareness.consciousnessRate, config.targetConsciousnessRate, "hi")})` : ""}`);
     if (awareness.configured.knowsExpert)
-      lines.push(`🧑‍💼 Taxa Conhece Especialista: ${pct(awareness.knowsExpertRate)}${config?.targetKnowsExpertRate ? ` (META: ${pct(config.targetKnowsExpertRate)}${dot(awareness.knowsExpertRate, config.targetKnowsExpertRate, "hi")})` : ""}`);
+      lines.push(`Taxa Conhece Especialista: ${pct(awareness.knowsExpertRate)}${config?.targetKnowsExpertRate ? ` (META: ${pct(config.targetKnowsExpertRate)}${dot(awareness.knowsExpertRate, config.targetKnowsExpertRate, "hi")})` : ""}`);
     if (awareness.configured.knowsAlliance)
-      lines.push(`🤝 Taxa Conhece Aliança: ${pct(awareness.knowsAllianceRate)}${config?.targetKnowsAllianceRate ? ` (META: ${pct(config.targetKnowsAllianceRate)}${dot(awareness.knowsAllianceRate, config.targetKnowsAllianceRate, "hi")})` : ""}`);
+      lines.push(`Taxa Conhece Aliança: ${pct(awareness.knowsAllianceRate)}${config?.targetKnowsAllianceRate ? ` (META: ${pct(config.targetKnowsAllianceRate)}${dot(awareness.knowsAllianceRate, config.targetKnowsAllianceRate, "hi")})` : ""}`);
   }
 
   if (tier && tier.distribution.length > 0) {
     lines.push("\n━━━━━━━━━━━━━━━━━━━━");
-    lines.push("📊 *DISTRIBUIÇÃO POR FAIXA*\n");
+    lines.push("\u{1F4CA} *DISTRIBUIÇÃO POR FAIXA*\n");
     for (const d of tier.distribution)
       lines.push(`${d.tierName}: ${d.percentage.toFixed(2).replace(".", ",")}% (${int(d.count)} leads)`);
     lines.push(`\nTotal: ${int(tier.total)} leads`);
