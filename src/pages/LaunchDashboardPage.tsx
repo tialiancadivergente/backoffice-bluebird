@@ -38,7 +38,13 @@ import {
   useLaunchTimeseries,
   useLaunchTierDistribution,
 } from "@/hooks/use-launch-dashboard";
-import type { LaunchDashboardFilters } from "@/types/launch-dashboard";
+import type {
+  LaunchAwarenessMetrics,
+  LaunchDashboardConfig,
+  LaunchDashboardFilters,
+  LaunchDashboardSummary,
+  LaunchTierDistribution as LaunchTierDistributionData,
+} from "@/types/launch-dashboard";
 
 function toParam(date: Date) {
   return format(date, "yyyy-MM-dd");
@@ -74,6 +80,93 @@ function saveFilters(f: LaunchDashboardFilters) {
     // ignore
   }
 }
+
+function buildShareMessage(
+  filters: LaunchDashboardFilters,
+  launchName: string | undefined,
+  accountNames: string[],
+  summary: LaunchDashboardSummary | undefined,
+  awareness: LaunchAwarenessMetrics | undefined,
+  tier: LaunchTierDistributionData | undefined,
+  config: LaunchDashboardConfig | null | undefined,
+): string {
+  const cur = (v: number | null | undefined) =>
+    v == null ? "—" : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+  const int = (v: number | null | undefined) =>
+    v == null ? "—" : v.toLocaleString("pt-BR");
+  const pct = (v: number | null | undefined) =>
+    v == null ? "—" : `${(v * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+
+  const dot = (actual: number | null | undefined, target: number | null | undefined, dir: "hi" | "lo") => {
+    if (actual == null || !target) return "";
+    const r = dir === "hi" ? actual / target : target / actual;
+    return r >= 1 ? " 🟢" : r >= 0.9 ? " 🟡" : " 🔴";
+  };
+
+  const fmtDate = (d: string) => d.split("-").reverse().join("/");
+
+  const lines: string[] = [];
+  const launch = launchName ?? "Todos os Lançamentos";
+  const period = filters.dateFrom && filters.dateTo
+    ? `${fmtDate(filters.dateFrom)} a ${fmtDate(filters.dateTo)}`
+    : "";
+
+  lines.push(`📊 *Dashboard ${launch}${period ? ` — ${period}` : ""}*`);
+  if (accountNames.length > 0) lines.push(`🔍 Contas: ${accountNames.join(", ")}`);
+
+  if (!summary) {
+    lines.push("\n_Sem dados disponíveis_");
+    return lines.join("\n");
+  }
+
+  lines.push("\n━━━━━━━━━━━━━━━━━━━━");
+  lines.push("💼 *MÍDIA*\n");
+  lines.push(`💰 Gasto: ${cur(summary.spend)}${config?.targetSpend ? ` (META: ${cur(config.targetSpend)}${dot(summary.spend, config.targetSpend, "hi")})` : ""}`);
+  lines.push(`   CPM: ${cur(summary.cpm)}${config?.targetCpm ? ` (META: ${cur(config.targetCpm)}${dot(summary.cpm, config.targetCpm, "lo")})` : ""}`);
+  lines.push(`📣 Impressões: ${int(summary.impressions)}`);
+  lines.push(`   CTR: ${pct(summary.ctr)}${config?.targetCtr ? ` (META: ${pct(config.targetCtr)}${dot(summary.ctr, config.targetCtr, "hi")})` : ""}`);
+  lines.push(`🖱️ Cliques: ${int(summary.clicks)}`);
+  lines.push(`   CPC: ${cur(summary.cpc)}${config?.targetCpc ? ` (META: ${cur(config.targetCpc)}${dot(summary.cpc, config.targetCpc, "lo")})` : ""}`);
+  lines.push(`🔗 Cliques Link: ${int(summary.inlineLinkClicks)}`);
+  lines.push(`   Connect Rate: ${pct(summary.connectRate)}${config?.targetConnectRate ? ` (META: ${pct(config.targetConnectRate)}${dot(summary.connectRate, config.targetConnectRate, "hi")})` : ""}`);
+  lines.push(`📄 Pág. Visualizadas: ${int(summary.landingPageViews)}`);
+  lines.push(`   Tx PgV→CK: ${pct(summary.txPgvCheckout)}${config?.targetPageConversion ? ` (META: ${pct(config.targetPageConversion)}${dot(summary.txPgvCheckout, config.targetPageConversion, "hi")})` : ""}`);
+
+  lines.push("\n━━━━━━━━━━━━━━━━━━━━");
+  lines.push("🎯 *FUNIL CRM*\n");
+  lines.push(`👥 Leads: ${int(summary.leads)}${config?.targetLeads ? ` (META: ${int(config.targetLeads)}${dot(summary.leads, config.targetLeads, "hi")})` : ""}`);
+  lines.push(`   CPL: ${cur(summary.cpl)}${config?.targetCpl ? ` (META: ${cur(config.targetCpl)}${dot(summary.cpl, config.targetCpl, "lo")})` : ""}`);
+  lines.push(`🛒 Inicios Checkout: ${int(summary.initiateCheckouts)}`);
+  lines.push(`🏆 Vendas Hotmart: ${int(summary.sales)}`);
+  lines.push(`💰 Receita: ${cur(summary.revenue)}`);
+
+  if (awareness) {
+    lines.push("\n━━━━━━━━━━━━━━━━━━━━");
+    lines.push("🧠 *CONSCIÊNCIA E ENGAJAMENTO*\n");
+    lines.push(`📋 Taxa Resposta Pesquisa: ${pct(awareness.surveyResponseRate)}`);
+    if (awareness.configured.consciousness)
+      lines.push(`💡 Taxa de Consciência: ${pct(awareness.consciousnessRate)}${config?.targetConsciousnessRate ? ` (META: ${pct(config.targetConsciousnessRate)}${dot(awareness.consciousnessRate, config.targetConsciousnessRate, "hi")})` : ""}`);
+    if (awareness.configured.knowsExpert)
+      lines.push(`🧑‍💼 Taxa Conhece Especialista: ${pct(awareness.knowsExpertRate)}${config?.targetKnowsExpertRate ? ` (META: ${pct(config.targetKnowsExpertRate)}${dot(awareness.knowsExpertRate, config.targetKnowsExpertRate, "hi")})` : ""}`);
+    if (awareness.configured.knowsAlliance)
+      lines.push(`🤝 Taxa Conhece Aliança: ${pct(awareness.knowsAllianceRate)}${config?.targetKnowsAllianceRate ? ` (META: ${pct(config.targetKnowsAllianceRate)}${dot(awareness.knowsAllianceRate, config.targetKnowsAllianceRate, "hi")})` : ""}`);
+  }
+
+  if (tier && tier.distribution.length > 0) {
+    lines.push("\n━━━━━━━━━━━━━━━━━━━━");
+    lines.push("📊 *DISTRIBUIÇÃO POR FAIXA*\n");
+    for (const d of tier.distribution)
+      lines.push(`${d.tierName}: ${d.percentage.toFixed(2).replace(".", ",")}% (${int(d.count)} leads)`);
+    lines.push(`\nTotal: ${int(tier.total)} leads`);
+  }
+
+  const now = new Date();
+  lines.push(`\n━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`_Gerado em ${now.toLocaleDateString("pt-BR")} ${now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}_`);
+
+  return lines.join("\n");
+}
+
 
 export default function LaunchDashboardPage() {
   const [filters, setFilters] = useState<LaunchDashboardFilters>(loadFilters);
@@ -131,16 +224,45 @@ export default function LaunchDashboardPage() {
             Funil completo: anúncio → lead → checkout → venda Hotmart.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 shrink-0"
-          onClick={() => setConfigOpen(true)}
-          title="Configurações do dashboard"
-        >
-          <Settings className="h-4 w-4" />
-          <span className="hidden sm:inline">Configurações</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            size="sm"
+            className="gap-1.5 bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0"
+            onClick={() => {
+              const accountNames = selectedAccountIds.map(
+                (id) => adAccounts.find((a) => a.externalAccountId === id)?.accountName ?? id,
+              );
+              const msg = buildShareMessage(
+                filters,
+                selectedLaunch?.name,
+                accountNames,
+                summaryQuery.data?.summary,
+                awarenessQuery.data,
+                tierQuery.data,
+                configQuery.data,
+              );
+              window.open(
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`,
+                "_blank",
+              );
+            }}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <span className="hidden sm:inline">Enviar no WhatsApp</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setConfigOpen(true)}
+            title="Configurações do dashboard"
+          >
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">Configurações</span>
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
