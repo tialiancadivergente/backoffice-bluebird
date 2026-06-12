@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useAvailableQuestions, useLaunchConfig, useUpsertLaunchConfig } from "@/hooks/use-launch-dashboard";
+import { useSeasons } from "@/hooks/use-seasons";
 import type { AvailableQuestion, LaunchDashboardConfig } from "@/types/launch-dashboard";
 
 interface Props {
@@ -129,7 +130,9 @@ function NumberInput({
 
 export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: Props) {
   const configQuery = useLaunchConfig(launchId);
-  const questionsQuery = useAvailableQuestions();
+  const seasonsQuery = useSeasons(launchId);
+  const [questionSeasonId, setQuestionSeasonId] = useState<string | undefined>(undefined);
+  const questionsQuery = useAvailableQuestions(launchId, questionSeasonId);
   const upsert = useUpsertLaunchConfig(launchId);
 
   const questions = questionsQuery.data ?? [];
@@ -149,14 +152,14 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
       targetCtr: fmtNum(c?.targetCtr),
       targetSurveyResponseRate: fmtNum(c?.targetSurveyResponseRate),
       targetConsciousnessRate: fmtNum(c?.targetConsciousnessRate),
-      targetKnowsEltonRate: fmtNum(c?.targetKnowsEltonRate),
+      targetKnowsExpertRate: fmtNum(c?.targetKnowsExpertRate),
       targetKnowsAllianceRate: fmtNum(c?.targetKnowsAllianceRate),
     });
     setConfig({
       questionKeyConsciousness: c?.questionKeyConsciousness ?? undefined,
       positiveOptionKeyConsciousness: c?.positiveOptionKeyConsciousness ?? undefined,
-      questionKeyKnowsElton: c?.questionKeyKnowsElton ?? undefined,
-      positiveOptionKeyKnowsElton: c?.positiveOptionKeyKnowsElton ?? undefined,
+      questionKeyKnowsExpert: c?.questionKeyKnowsExpert ?? undefined,
+      positiveOptionKeyKnowsExpert: c?.positiveOptionKeyKnowsExpert ?? undefined,
       questionKeyKnowsAlliance: c?.questionKeyKnowsAlliance ?? undefined,
       positiveOptionKeyKnowsAlliance: c?.positiveOptionKeyKnowsAlliance ?? undefined,
     });
@@ -168,8 +171,14 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
     return questions.find((q) => q.questionKey === qKey)?.options ?? [];
   }
 
+  function isTextQuestion(qKey: string | null | undefined) {
+    return questions.find((q) => q.questionKey === qKey)?.inputType === "text";
+  }
+
   function handleSave() {
     if (!launchId) return;
+    // Envia null (não undefined) para os question keys não configurados,
+    // garantindo que o valor chegue no JSON e limpe o campo no banco.
     const payload: LaunchDashboardConfig = {
       targetSpend: num(form.targetSpend),
       targetLeads: num(form.targetLeads),
@@ -181,9 +190,14 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
       targetCtr: num(form.targetCtr),
       targetSurveyResponseRate: num(form.targetSurveyResponseRate),
       targetConsciousnessRate: num(form.targetConsciousnessRate),
-      targetKnowsEltonRate: num(form.targetKnowsEltonRate),
+      targetKnowsExpertRate: num(form.targetKnowsExpertRate),
       targetKnowsAllianceRate: num(form.targetKnowsAllianceRate),
-      ...config,
+      questionKeyConsciousness: config.questionKeyConsciousness ?? null,
+      positiveOptionKeyConsciousness: config.positiveOptionKeyConsciousness ?? null,
+      questionKeyKnowsExpert: config.questionKeyKnowsExpert ?? null,
+      positiveOptionKeyKnowsExpert: config.positiveOptionKeyKnowsExpert ?? null,
+      questionKeyKnowsAlliance: config.questionKeyKnowsAlliance ?? null,
+      positiveOptionKeyKnowsAlliance: config.positiveOptionKeyKnowsAlliance ?? null,
     };
     upsert.mutate(payload, { onSuccess: () => onOpenChange(false) });
   }
@@ -292,9 +306,9 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
                 hint="Valor entre 0 e 1"
               />
               <NumberInput
-                label="Taxa Conhece Elton Meta (ex: 0.25)"
-                value={form.targetKnowsEltonRate ?? ""}
-                onChange={(v) => setForm((p) => ({ ...p, targetKnowsEltonRate: v }))}
+                label="Taxa Conhece Especialista Meta (ex: 0.25)"
+                value={form.targetKnowsExpertRate ?? ""}
+                onChange={(v) => setForm((p) => ({ ...p, targetKnowsExpertRate: v }))}
                 hint="Valor entre 0 e 1"
               />
               <NumberInput
@@ -316,6 +330,26 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
                 Vincule perguntas do quiz às métricas de consciência. O denominador é o total de respondentes da pesquisa.
               </p>
             </div>
+
+            {(seasonsQuery.data?.length ?? 0) > 0 && (
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground shrink-0">Filtrar por season:</Label>
+                <Select
+                  value={questionSeasonId ?? "__all__"}
+                  onValueChange={(v) => setQuestionSeasonId(v === "__all__" ? undefined : v)}
+                >
+                  <SelectTrigger className="h-7 text-xs w-44">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas as seasons</SelectItem>
+                    {seasonsQuery.data?.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {questionsQuery.isLoading && (
               <p className="text-xs text-muted-foreground">Carregando perguntas...</p>
@@ -342,31 +376,35 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Opção positiva</Label>
-                  <OptionSelect
-                    value={config.positiveOptionKeyConsciousness}
-                    onChange={(v) =>
-                      setConfig((p) => ({ ...p, positiveOptionKeyConsciousness: v }))
-                    }
-                    options={optionsFor(config.questionKeyConsciousness)}
-                    disabled={!config.questionKeyConsciousness}
-                  />
+                  {isTextQuestion(config.questionKeyConsciousness) ? (
+                    <p className="text-xs text-muted-foreground pt-2">Qualquer resposta conta</p>
+                  ) : (
+                    <OptionSelect
+                      value={config.positiveOptionKeyConsciousness}
+                      onChange={(v) =>
+                        setConfig((p) => ({ ...p, positiveOptionKeyConsciousness: v }))
+                      }
+                      options={optionsFor(config.questionKeyConsciousness)}
+                      disabled={!config.questionKeyConsciousness}
+                    />
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Conhece Elton */}
+            {/* Conhece Especialista */}
             <div className="space-y-2 rounded-lg border border-border p-3">
-              <p className="text-xs font-medium">Taxa Conhece Elton</p>
+              <p className="text-xs font-medium">Taxa Conhece Especialista</p>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Pergunta</Label>
                   <QuestionSelect
-                    value={config.questionKeyKnowsElton}
+                    value={config.questionKeyKnowsExpert}
                     onChange={(v) =>
                       setConfig((p) => ({
                         ...p,
-                        questionKeyKnowsElton: v,
-                        positiveOptionKeyKnowsElton: undefined,
+                        questionKeyKnowsExpert: v,
+                        positiveOptionKeyKnowsExpert: undefined,
                       }))
                     }
                     questions={questions}
@@ -376,12 +414,12 @@ export function LaunchConfigModal({ open, onOpenChange, launchId, launchName }: 
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Opção positiva</Label>
                   <OptionSelect
-                    value={config.positiveOptionKeyKnowsElton}
+                    value={config.positiveOptionKeyKnowsExpert}
                     onChange={(v) =>
-                      setConfig((p) => ({ ...p, positiveOptionKeyKnowsElton: v }))
+                      setConfig((p) => ({ ...p, positiveOptionKeyKnowsExpert: v }))
                     }
-                    options={optionsFor(config.questionKeyKnowsElton)}
-                    disabled={!config.questionKeyKnowsElton}
+                    options={optionsFor(config.questionKeyKnowsExpert)}
+                    disabled={!config.questionKeyKnowsExpert}
                   />
                 </div>
               </div>

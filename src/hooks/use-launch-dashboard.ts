@@ -20,7 +20,7 @@ const launchDashKeys = {
   awareness: (f: LaunchDashboardFilters) => ["launch-dashboard", "awareness", f] as const,
   tierDistribution: (f: LaunchDashboardFilters) => ["launch-dashboard", "tier-distribution", f] as const,
   config: (launchId: string) => ["launch-dashboard", "config", launchId] as const,
-  availableQuestions: () => ["launch-dashboard", "available-questions"] as const,
+  availableQuestions: (launchId?: string, seasonId?: string) => ["launch-dashboard", "available-questions", launchId, seasonId] as const,
 };
 
 function hasRequiredDates(f: LaunchDashboardFilters) {
@@ -89,10 +89,10 @@ export function useLaunchConfig(launchId: string | undefined) {
   });
 }
 
-export function useAvailableQuestions() {
+export function useAvailableQuestions(launchId?: string, seasonId?: string) {
   return useQuery({
-    queryKey: launchDashKeys.availableQuestions(),
-    queryFn: fetchAvailableQuestions,
+    queryKey: launchDashKeys.availableQuestions(launchId, seasonId),
+    queryFn: () => fetchAvailableQuestions(launchId, seasonId),
     staleTime: 5 * 60_000,
   });
 }

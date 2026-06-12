@@ -77,11 +77,11 @@ export interface LaunchAwarenessMetrics {
   totalFormResponses: number;
   surveyResponseRate: number | null;
   consciousnessRate: number | null;
-  knowsEltonRate: number | null;
+  knowsExpertRate: number | null;
   knowsAllianceRate: number | null;
   configured: {
     consciousness: boolean;
-    knowsElton: boolean;
+    knowsExpert: boolean;
     knowsAlliance: boolean;
   };
 }
@@ -112,13 +112,13 @@ export interface LaunchDashboardConfig {
   targetCtr?: number | null;
   targetSurveyResponseRate?: number | null;
   targetConsciousnessRate?: number | null;
-  targetKnowsEltonRate?: number | null;
+  targetKnowsExpertRate?: number | null;
   targetKnowsAllianceRate?: number | null;
   // question keys
   questionKeyConsciousness?: string | null;
   positiveOptionKeyConsciousness?: string | null;
-  questionKeyKnowsElton?: string | null;
-  positiveOptionKeyKnowsElton?: string | null;
+  questionKeyKnowsExpert?: string | null;
+  positiveOptionKeyKnowsExpert?: string | null;
   questionKeyKnowsAlliance?: string | null;
   positiveOptionKeyKnowsAlliance?: string | null;
 }
@@ -126,6 +126,7 @@ export interface LaunchDashboardConfig {
 export interface AvailableQuestion {
   questionKey: string;
   questionText: string | null;
+  inputType: string | null;
   options: { optionKey: string; optionText: string | null }[];
 }
 

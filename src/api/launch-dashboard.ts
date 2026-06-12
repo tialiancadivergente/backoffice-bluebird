@@ -96,9 +96,13 @@ export async function upsertLaunchConfig(
   return data;
 }
 
-export async function fetchAvailableQuestions(): Promise<AvailableQuestion[]> {
+export async function fetchAvailableQuestions(launchId?: string, seasonId?: string): Promise<AvailableQuestion[]> {
+  const params: Record<string, string> = {};
+  if (launchId) params.launchId = launchId;
+  if (seasonId) params.seasonId = seasonId;
   const { data } = await api.get<AvailableQuestion[]>(
     "/launch-dashboard/available-questions",
+    { params: Object.keys(params).length ? params : undefined },
   );
   return Array.isArray(data) ? data : [];
 }

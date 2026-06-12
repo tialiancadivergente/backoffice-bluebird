@@ -103,9 +103,9 @@ export function LaunchAwarenessCards({ data, config, isLoading }: Props) {
     "higher_better",
   );
 
-  const knowsEltonStatus = computeStatus(
-    data.knowsEltonRate,
-    config?.targetKnowsEltonRate,
+  const knowsExpertStatus = computeStatus(
+    data.knowsExpertRate,
+    config?.targetKnowsExpertRate,
     "higher_better",
   );
 
@@ -131,11 +131,11 @@ export function LaunchAwarenessCards({ data, config, isLoading }: Props) {
         unconfigured={!data.configured.consciousness}
       />
       <AwarenessCard
-        label="Taxa Conhece Elton"
+        label="Taxa Conhece Especialista"
         sublabel="Métrica de Consciência"
-        value={fmtPct(data.knowsEltonRate)}
-        status={knowsEltonStatus}
-        unconfigured={!data.configured.knowsElton}
+        value={fmtPct(data.knowsExpertRate)}
+        status={knowsExpertStatus}
+        unconfigured={!data.configured.knowsExpert}
       />
       <AwarenessCard
         label="Taxa Conhece Aliança"
