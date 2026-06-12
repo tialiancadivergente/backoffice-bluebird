@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  fetchAdAccounts,
   fetchAvailableQuestions,
   fetchLaunchAwareness,
   fetchLaunchConfig,
@@ -20,6 +21,7 @@ const launchDashKeys = {
   awareness: (f: LaunchDashboardFilters) => ["launch-dashboard", "awareness", f] as const,
   tierDistribution: (f: LaunchDashboardFilters) => ["launch-dashboard", "tier-distribution", f] as const,
   config: (launchId: string) => ["launch-dashboard", "config", launchId] as const,
+  adAccounts: (f: LaunchDashboardFilters) => ["launch-dashboard", "ad-accounts", f] as const,
   availableQuestions: (launchId?: string, seasonId?: string) => ["launch-dashboard", "available-questions", launchId, seasonId] as const,
 };
 
@@ -86,6 +88,15 @@ export function useLaunchConfig(launchId: string | undefined) {
     queryFn: () => fetchLaunchConfig(launchId!),
     enabled: Boolean(launchId),
     staleTime: 30_000,
+  });
+}
+
+export function useAdAccounts(filters: LaunchDashboardFilters) {
+  return useQuery({
+    queryKey: launchDashKeys.adAccounts(filters),
+    queryFn: () => fetchAdAccounts(filters),
+    enabled: hasRequiredDates(filters),
+    staleTime: 60_000,
   });
 }
 

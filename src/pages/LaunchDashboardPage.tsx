@@ -29,6 +29,7 @@ import { LaunchAwarenessCards } from "@/components/launch-dashboard/LaunchAwaren
 import { LaunchTierDistribution } from "@/components/launch-dashboard/LaunchTierDistribution";
 import { LaunchConfigModal } from "@/components/launch-dashboard/LaunchConfigModal";
 import {
+  useAdAccounts,
   useLaunchAwareness,
   useLaunchConfig,
   useLaunchFunnelTable,
@@ -47,6 +48,8 @@ function fromParam(date: string) {
   return new Date(`${date}T12:00:00`);
 }
 
+const FILTERS_KEY = "launch_dashboard_filters";
+
 function defaultFilters(): LaunchDashboardFilters {
   const today = new Date();
   const thirtyDaysAgo = new Date(today);
@@ -54,18 +57,39 @@ function defaultFilters(): LaunchDashboardFilters {
   return { dateFrom: toParam(thirtyDaysAgo), dateTo: toParam(today) };
 }
 
+function loadFilters(): LaunchDashboardFilters {
+  try {
+    const raw = localStorage.getItem(FILTERS_KEY);
+    if (raw) return { ...defaultFilters(), ...JSON.parse(raw) };
+  } catch {
+    // ignore
+  }
+  return defaultFilters();
+}
+
+function saveFilters(f: LaunchDashboardFilters) {
+  try {
+    localStorage.setItem(FILTERS_KEY, JSON.stringify(f));
+  } catch {
+    // ignore
+  }
+}
+
 export default function LaunchDashboardPage() {
-  const [filters, setFilters] = useState<LaunchDashboardFilters>(defaultFilters);
+  const [filters, setFilters] = useState<LaunchDashboardFilters>(loadFilters);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
 
   const launchesQuery = useLaunchOptions();
+  const adAccountsQuery = useAdAccounts(filters);
   const summaryQuery = useLaunchSummary(filters);
   const timeseriesQuery = useLaunchTimeseries(filters);
   const funnelQuery = useLaunchFunnelTable(filters);
   const awarenessQuery = useLaunchAwareness(filters);
   const tierQuery = useLaunchTierDistribution(filters);
   const configQuery = useLaunchConfig(filters.launchId);
+
+  const adAccounts = adAccountsQuery.data ?? [];
 
   const launches = launchesQuery.data ?? [];
   const selectedLaunch = launches.find((l) => l.id === filters.launchId);
@@ -74,11 +98,17 @@ export default function LaunchDashboardPage() {
     key: K,
     value: LaunchDashboardFilters[K],
   ) {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    setFilters((prev) => {
+      const next = { ...prev, [key]: value };
+      saveFilters(next);
+      return next;
+    });
   }
 
   function clearFilters() {
-    setFilters(defaultFilters());
+    const f = defaultFilters();
+    saveFilters(f);
+    setFilters(f);
   }
 
   return (
@@ -185,7 +215,28 @@ export default function LaunchDashboardPage() {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Conta de Anúncio</Label>
+                <Select
+                  value={filters.externalAccountId ?? "all"}
+                  onValueChange={(v) =>
+                    setFilter("externalAccountId", v === "all" ? undefined : v)
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Todas as contas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as contas</SelectItem>
+                    {adAccounts.map((a) => (
+                      <SelectItem key={a.externalAccountId} value={a.externalAccountId}>
+                        {a.accountName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Campanha ID</Label>
                 <input
@@ -238,6 +289,7 @@ export default function LaunchDashboardPage() {
         <h2 className="text-base font-semibold mb-3">Indicadores</h2>
         <LaunchKpiCards
           data={summaryQuery.data?.summary}
+          config={configQuery.data}
           isLoading={summaryQuery.isLoading}
           isError={summaryQuery.isError}
         />

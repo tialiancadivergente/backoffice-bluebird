@@ -148,3 +148,8 @@ export interface LaunchOption {
   name: string;
   active: boolean;
 }
+
+export interface AdAccountOption {
+  externalAccountId: string;
+  accountName: string;
+}
